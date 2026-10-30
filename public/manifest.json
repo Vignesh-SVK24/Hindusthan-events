@@ -1,6 +1,6 @@
 {
-  "name": "Hindusthan College Events Hub",
-  "short_name": "Hindusthan Events",
+  "name": "Hindusthan College of Engineering and Technology Events Hub",
+  "short_name": "HiCET Events",
   "description": "Central Campus Event Discovery & Registration Platform",
   "start_url": "/",
   "display": "standalone",

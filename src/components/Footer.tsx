@@ -22,8 +22,8 @@ export default function Footer() {
             />
           </div>
           <div>
-            <p className="text-sm font-black text-[#252525]">Hindusthan Educational & Charitable Trust</p>
-            <p className="text-xs text-[#77736A]">College Events Hub • All Rights Reserved © {new Date().getFullYear()}</p>
+            <p className="text-sm font-black text-[#252525]">Hindusthan College of Engineering and Technology</p>
+            <p className="text-xs text-[#77736A]">Events & Discovery Hub • Hindusthan Educational & Charitable Trust</p>
           </div>
         </div>
 

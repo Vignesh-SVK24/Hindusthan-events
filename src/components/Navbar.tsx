@@ -39,11 +39,11 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
                 sizes="48px"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm sm:text-base font-black tracking-wide text-[#252525] group-hover:text-[#C99A27] transition-colors uppercase leading-tight font-sans">
-                HINDUSTHAN
+            <div className="flex flex-col max-w-[190px] xs:max-w-[240px] sm:max-w-md md:max-w-none">
+              <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-tight text-[#252525] group-hover:text-[#C99A27] transition-colors uppercase leading-tight font-sans">
+                HINDUSTHAN COLLEGE OF ENGINEERING AND TECHNOLOGY
               </span>
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-[#77736A] uppercase">
+              <span className="text-[9px] sm:text-[10px] md:text-[11px] font-bold tracking-wider text-[#77736A] uppercase">
                 Events & Discovery Hub
               </span>
             </div>

@@ -3,14 +3,14 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'Hindusthan Events Hub — Spatial Campus Event Discovery Platform',
-  description: 'Official central events hub for Hindusthan Educational & Charitable Trust. Discover hackathons, cultural festivals, symposia, and athletic championships with bespoke dynamic webpages and real-time registration.',
+  title: 'HINDUSTHAN COLLEGE OF ENGINEERING AND TECHNOLOGY — Events & Discovery Hub',
+  description: 'Official central events hub for Hindusthan College of Engineering and Technology (HiCET). Discover hackathons, cultural festivals, symposia, and athletic championships with bespoke dynamic webpages and real-time registration.',
   manifest: '/manifest.json',
-  applicationName: 'Hindusthan Events',
+  applicationName: 'HiCET Events Hub',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Hindusthan Events',
+    title: 'HiCET Events',
   },
   icons: {
     icon: [
