@@ -1,7 +1,7 @@
 # Hindusthan College Events Hub 🎓
 ### Central Campus Event Discovery, Bespoke Dynamic Webpages & Real-time Registration Platform
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/Hindusthan-events)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/hindusthan-events-hicet)
 
 A modern full-stack web application developed for **Hindusthan Educational and Charitable Trust**, Coimbatore. It provides a centralized discovery portal for all college events, an animated college logo opening sequence, dynamically generated independent webpages with bespoke themes, and a strict event-wise registration ON/OFF engine with QR code entry tickets.
 
@@ -38,14 +38,14 @@ To make the platform live on the web:
 
 ### Option 1: Deploy with Vercel (Recommended)
 1. Click the button below:
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/Hindusthan-events)
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/hindusthan-events-hicet)
 2. Log in with your GitHub account (`Vignesh-SVK24`).
-3. Click **Deploy**. Vercel will automatically build and assign a free global live URL (e.g. `https://hindusthan-events.vercel.app`).
+3. Click **Deploy**. Vercel will automatically build and assign a free global live URL (e.g. `https://hindusthan-events-hicet.vercel.app`).
 
 ### Option 2: Run Locally
 ```bash
-git clone https://github.com/Vignesh-SVK24/Hindusthan-events.git
-cd Hindusthan-events
+git clone https://github.com/Vignesh-SVK24/hindusthan-events-hicet.git
+cd hindusthan-events-hicet
 npm install
 npm run build
 npm start
