@@ -27,7 +27,6 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { EventItem, EventCategory, EventTheme, EventMedia, EventRegistration } from '@/lib/types';
-import { useAuth } from '@/context/AuthContext';
 
 interface EventPageClientProps {
   initialEvent: EventItem & {
@@ -39,7 +38,6 @@ interface EventPageClientProps {
 }
 
 export default function EventPageClient({ initialEvent }: EventPageClientProps) {
-  const { user } = useAuth();
   const [event, setEvent] = useState(initialEvent);
   const theme = event.theme;
 
@@ -54,45 +52,13 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
 
   // Registration Form State
   const [formData, setFormData] = useState({
-    full_name: user?.full_name || '',
-    email: user?.email || '',
-    register_number: user?.register_number || '',
-    department: user?.department || '',
-    year: '3rd Year',
+    full_name: '',
+    email: '',
+    register_number: '',
+    department: 'Computer Science & Engineering',
+    year: '1st Year',
     contact_number: '',
   });
-
-  useEffect(() => {
-    if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        full_name: user.full_name || prev.full_name,
-        email: user.email || prev.email,
-        register_number: user.register_number || prev.register_number,
-        department: user.department || prev.department,
-      }));
-    }
-  }, [user]);
-
-  useEffect(() => {
-    async function checkReg() {
-      if (!user) return;
-      try {
-        const res = await fetch(`/api/events/${event.slug}/register`);
-        const data = await res.json();
-        if (data.registered && data.registration) {
-          setIsRegistered(true);
-          setRegistrationData(data.registration);
-          const qrData = `EVENT:${event.slug}|TICKET:${data.registration.id}|REG:${data.registration.register_number}`;
-          const qr = await QRCode.toDataURL(qrData, { margin: 1, width: 200 });
-          setQrCodeUrl(qr);
-        }
-      } catch (err) {
-        console.error('Error verifying registration status:', err);
-      }
-    }
-    checkReg();
-  }, [user, event.slug]);
 
   // Live Countdown calculation
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({
@@ -129,10 +95,6 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
   // Handle Registration Submit
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      setRegError('Please log in with a student account to register.');
-      return;
-    }
 
     if (!event.registration_enabled) {
       setRegError('Registration is closed for this event.');

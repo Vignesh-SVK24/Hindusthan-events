@@ -5,14 +5,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { 
-  User, 
   ShieldCheck, 
-  LogOut, 
   Menu, 
   X, 
+  LogOut, 
   Sparkles,
-  Ticket,
-  ChevronDown
+  Lock
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -20,13 +18,12 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onReplayIntro }: NavbarProps) {
-  const { user, logout, quickLogin } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 w-full px-3 sm:px-6 lg:px-8 pt-3 pb-2 transition-all">
-      {/* Floating Spatial Navigation Surface Container */}
+      {/* Floating Spatial Pill Container */}
       <div className="max-w-7xl mx-auto rounded-2xl sm:rounded-full bg-white/90 backdrop-blur-xl border border-[#F0E8D4] shadow-[0_10px_30px_-5px_rgba(231,184,63,0.1),0_4px_12px_-2px_rgba(0,0,0,0.03)] px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 sm:h-20">
           
@@ -37,6 +34,7 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
                 src="/college-logo.jpg"
                 alt="Hindusthan Logo"
                 fill
+                priority
                 className="object-contain p-0.5"
                 sizes="48px"
               />
@@ -90,105 +88,35 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
             )}
           </nav>
 
-          {/* Right Action / Authentication Controls */}
+          {/* Right Action / Admin Controls */}
           <div className="hidden md:flex items-center space-x-2.5">
-            {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#FFFDF5] border border-[#F0E8D4] hover:border-[#E7B83F] shadow-sm transition-all text-left"
+            {isAdmin ? (
+              <div className="flex items-center space-x-2">
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFE99A] hover:bg-[#E7B83F] border border-[#E7B83F]/30 text-xs font-black text-[#252525] shadow-sm transition-all"
                 >
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${
-                    user.role === 'admin' 
-                      ? 'bg-[#E7B83F] text-[#252525] font-black shadow-sm' 
-                      : 'bg-[#FFF0B3] text-[#252525]'
-                  }`}>
-                    {user.role === 'admin' ? <ShieldCheck className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-[#252525] max-w-[120px] truncate leading-tight">
-                      {user.full_name}
-                    </span>
-                    <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                      user.role === 'admin' ? 'text-[#C99A27]' : 'text-[#77736A]'
-                    }`}>
-                      {user.role}
-                    </span>
-                  </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-[#77736A] ml-0.5" />
+                  <ShieldCheck className="w-4 h-4 text-[#C99A27]" />
+                  <span>Admin CMS</span>
+                </Link>
+
+                <button
+                  onClick={() => logout()}
+                  title="Sign out of Admin Session"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#FFFDF5] border border-[#F0E8D4] hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-xs font-bold text-[#77736A] transition-all"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
                 </button>
-
-                {/* Spatial Dropdown Menu */}
-                {userDropdownOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-56 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#F0E8D4] shadow-[0_15px_35px_rgba(180,140,40,0.12)] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-                    onMouseLeave={() => setUserDropdownOpen(false)}
-                  >
-                    <div className="px-4 py-2 border-b border-[#F0E8D4]">
-                      <p className="text-[10px] text-[#77736A]">Signed in as</p>
-                      <p className="text-xs font-semibold text-[#252525] truncate">{user.email}</p>
-                    </div>
-
-                    {user.role === 'admin' && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-[#C99A27] hover:bg-[#FFF9E8] transition-colors"
-                      >
-                        <ShieldCheck className="w-4 h-4" />
-                        Admin CMS Dashboard
-                      </Link>
-                    )}
-
-                    <Link
-                      href="/profile"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-[#252525] hover:bg-[#FFF9E8] transition-colors"
-                    >
-                      <Ticket className="w-4 h-4 text-[#C99A27]" />
-                      My Event Registrations
-                    </Link>
-
-                    <div className="border-t border-[#F0E8D4] my-1" />
-
-                    <button
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        logout();
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Log out
-                    </button>
-                  </div>
-                )}
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                {/* 1-Click Fast Switch Demo Buttons */}
-                <button
-                  onClick={() => quickLogin('admin')}
-                  className="px-3 py-1.5 text-xs font-bold text-[#252525] bg-[#FFF0B3]/60 hover:bg-[#FFE99A] border border-[#F0E8D4] rounded-full transition-all shadow-sm"
-                  title="Instant Admin Access for Evaluation"
-                >
-                  ⚡ Admin Demo
-                </button>
-                <button
-                  onClick={() => quickLogin('student')}
-                  className="px-3 py-1.5 text-xs font-bold text-[#252525] bg-[#FFF6D8] hover:bg-[#FFE99A] border border-[#F0E8D4] rounded-full transition-all shadow-sm"
-                  title="Instant Student Access for Evaluation"
-                >
-                  ⚡ Student Demo
-                </button>
-                
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-xs font-black text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] rounded-full shadow-[0_4px_12px_rgba(231,184,63,0.25)] transition-all ml-0.5"
-                >
-                  Sign In
-                </Link>
-              </div>
+              <Link
+                href="/login"
+                className="flex items-center gap-2 px-4 py-2 text-xs font-black text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] rounded-full shadow-[0_4px_12px_rgba(231,184,63,0.25)] transition-all ml-0.5"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Admin Login</span>
+              </Link>
             )}
           </div>
 
@@ -197,6 +125,7 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
             {onReplayIntro && (
               <button
                 onClick={onReplayIntro}
+                aria-label="Replay Logo Intro"
                 className="p-2 text-[#C99A27] bg-[#FFF0B3]/50 rounded-full"
               >
                 <Sparkles className="w-4 h-4" />
@@ -204,6 +133,7 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Navigation Menu"
               className="p-2.5 text-[#252525] hover:text-[#C99A27] rounded-full bg-[#FFFDF5] border border-[#F0E8D4] shadow-sm"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -238,69 +168,40 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
             About Hindusthan
           </Link>
 
-          {user ? (
-            <div className="pt-3 border-t border-[#F0E8D4] space-y-2">
-              <div className="px-3.5 py-2.5 bg-[#FFF9E8] rounded-2xl border border-[#F0E8D4]">
-                <p className="text-xs font-black text-[#252525]">{user.full_name}</p>
-                <p className="text-[11px] text-[#C99A27] uppercase font-bold">{user.role} • {user.email}</p>
-              </div>
-              {user.role === 'admin' && (
+          <div className="pt-3 border-t border-[#F0E8D4]">
+            {isAdmin ? (
+              <div className="space-y-2">
                 <Link
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3.5 py-2.5 text-sm font-bold text-[#252525] bg-[#FFE99A] rounded-xl text-center shadow-sm"
+                  className="flex items-center justify-center gap-2 w-full px-3.5 py-3 text-sm font-black text-[#252525] bg-[#FFE99A] rounded-2xl text-center shadow-sm"
                 >
-                  Admin CMS Dashboard
+                  <ShieldCheck className="w-4 h-4 text-[#C99A27]" />
+                  <span>Admin CMS Dashboard</span>
                 </Link>
-              )}
-              <Link
-                href="/profile"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3.5 py-2.5 text-sm font-semibold text-[#252525] bg-[#FFF0B3]/50 rounded-xl"
-              >
-                My Event Registrations
-              </Link>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  logout();
-                }}
-                className="w-full text-left px-3.5 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl"
-              >
-                Log Out
-              </button>
-            </div>
-          ) : (
-            <div className="pt-3 border-t border-[#F0E8D4] space-y-2.5">
-              <div className="grid grid-cols-2 gap-2">
+
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    quickLogin('admin');
+                    logout();
                   }}
-                  className="px-3 py-2.5 text-xs font-bold text-[#252525] bg-[#FFF0B3]/70 border border-[#F0E8D4] rounded-xl text-center shadow-sm"
+                  className="flex items-center justify-center gap-2 w-full px-3.5 py-2.5 text-xs font-bold text-rose-600 bg-rose-50 rounded-2xl"
                 >
-                  ⚡ Admin Demo
-                </button>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    quickLogin('student');
-                  }}
-                  className="px-3 py-2.5 text-xs font-bold text-[#252525] bg-[#FFF6D8] border border-[#F0E8D4] rounded-xl text-center shadow-sm"
-                >
-                  ⚡ Student Demo
+                  <LogOut className="w-4 h-4" />
+                  <span>Log Out of Admin</span>
                 </button>
               </div>
+            ) : (
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block w-full py-3 text-center text-sm font-black text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] rounded-2xl shadow-[0_4px_12px_rgba(231,184,63,0.25)]"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-black text-[#252525] bg-[#FFE99A] rounded-2xl shadow-sm"
               >
-                Sign In / Register
+                <Lock className="w-4 h-4" />
+                <span>Admin Login</span>
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </header>

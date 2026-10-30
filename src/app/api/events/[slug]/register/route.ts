@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getEventBySlug, registerUserForEvent, getDatabase } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
 
 export async function GET(
   request: Request,
   { params }: { params: { slug: string } }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+    const register_number = searchParams.get('register_number');
+
+    if (!email && !register_number) {
       return NextResponse.json({ registered: false, registration: null });
     }
 
@@ -19,7 +21,10 @@ export async function GET(
 
     const db = getDatabase();
     const reg = db.event_registrations.find(
-      (r) => r.event_id === event.id && (r.user_id === user.id || r.email.toLowerCase() === user.email.toLowerCase())
+      (r) =>
+        r.event_id === event.id &&
+        ((email && r.email.toLowerCase() === email.toLowerCase().trim()) ||
+          (register_number && r.register_number.toLowerCase() === register_number.toLowerCase().trim()))
     );
 
     return NextResponse.json({
@@ -37,11 +42,6 @@ export async function POST(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required. Please sign in to register.' }, { status: 401 });
-    }
-
     const event = getEventBySlug(params.slug);
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -58,13 +58,29 @@ export async function POST(
     const body = await request.json();
     const { full_name, email, register_number, department, year, contact_number } = body;
 
+    // Server-side validation
+    if (!full_name || typeof full_name !== 'string' || full_name.trim().length < 2) {
+      return NextResponse.json({ error: 'Full name is required (minimum 2 characters).' }, { status: 400 });
+    }
+
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return NextResponse.json({ error: 'A valid email address is required.' }, { status: 400 });
+    }
+
+    if (!register_number || typeof register_number !== 'string' || register_number.trim().length < 2) {
+      return NextResponse.json({ error: 'College register / roll number is required.' }, { status: 400 });
+    }
+
+    if (!department || typeof department !== 'string') {
+      return NextResponse.json({ error: 'Department name is required.' }, { status: 400 });
+    }
+
     const result = registerUserForEvent({
       event_id: event.id,
-      user_id: user.id,
-      full_name: full_name?.trim() || user.full_name,
-      email: email?.trim() || user.email,
-      register_number: register_number?.trim() || user.register_number || 'N/A',
-      department: department?.trim() || user.department || 'N/A',
+      full_name: full_name.trim(),
+      email: email.trim().toLowerCase(),
+      register_number: register_number.trim().toUpperCase(),
+      department: department.trim(),
       year: year || '1st Year',
       contact_number: contact_number?.trim() || '',
     });
@@ -79,7 +95,7 @@ export async function POST(
       registration: result.registration,
     });
   } catch (error) {
-    console.error('Error processing registration:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Registration processing error:', error);
+    return NextResponse.json({ error: 'Internal server error during registration' }, { status: 500 });
   }
 }

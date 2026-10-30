@@ -31,7 +31,7 @@ import { EventItem, EventCategory, EventTheme, ThemePreset } from '@/lib/types';
 import { THEME_PRESETS } from '@/lib/themePresets';
 
 export default function AdminPage() {
-  const { user, isLoading, logout, quickLogin } = useAuth();
+  const { user, isAdmin, isLoading, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'create' | 'registrations'>('overview');
   const [stats, setStats] = useState<any>(null);
@@ -138,10 +138,10 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    if (user && user.role === 'admin') {
+    if (isAdmin) {
       loadAdminData();
     }
-  }, [user]);
+  }, [isAdmin]);
 
   const handlePresetSelect = (presetKey: ThemePreset) => {
     const preset = THEME_PRESETS[presetKey];
@@ -350,7 +350,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-[#FFFDF5] flex items-center justify-center px-4 text-[#252525]">
         <div className="max-w-md w-full bg-white border border-[#F0E8D4] rounded-3xl p-8 text-center space-y-6 shadow-spatial-lg">
@@ -364,17 +364,11 @@ export default function AdminPage() {
             </p>
           </div>
           <div className="space-y-3 pt-2">
-            <button
-              onClick={() => quickLogin('admin')}
-              className="w-full py-3.5 rounded-full font-black text-sm text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] shadow-[0_4px_16px_rgba(231,184,63,0.3)] transition-all"
-            >
-              ⚡ Instant 1-Click Admin Login
-            </button>
             <Link
               href="/login"
-              className="block w-full py-3 text-xs font-bold text-[#77736A] hover:text-[#252525] bg-[#FFF9E8] rounded-full border border-[#F0E8D4]"
+              className="block w-full py-3.5 rounded-full font-black text-sm text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] shadow-[0_4px_16px_rgba(231,184,63,0.3)] transition-all"
             >
-              Go to Standard Login Page
+              Sign In to Admin Console →
             </Link>
             <Link
               href="/"
@@ -412,7 +406,7 @@ export default function AdminPage() {
 
           <div className="flex items-center gap-3">
             <span className="text-xs text-[#77736A] hidden md:inline">
-              Admin: <strong className="text-[#252525]">{user.full_name}</strong>
+              Admin: <strong className="text-[#252525]">{user?.full_name || 'Administrator'}</strong>
             </span>
             <Link
               href="/"

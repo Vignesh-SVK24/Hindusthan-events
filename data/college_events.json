@@ -9,16 +9,6 @@
       "department": "Central Administration",
       "register_number": "FAC-ADMIN-01",
       "created_at": "2026-10-30T18:44:06.411Z"
-    },
-    {
-      "id": "student-usr-1",
-      "full_name": "Priya Sharma",
-      "email": "student@hindusthan.net",
-      "password_hash": "student123",
-      "role": "student",
-      "department": "Computer Science and Engineering",
-      "register_number": "720721104042",
-      "created_at": "2026-10-30T18:44:06.411Z"
     }
   ],
   "event_categories": [
@@ -317,7 +307,7 @@
       "start_time": "09:30",
       "end_time": "16:30",
       "venue": "Convention Center, Hindusthan Campus",
-      "registration_enabled": false,
+      "registration_enabled": true,
       "registration_type": "builtin",
       "registration_deadline": "2026-10-25T23:59:59",
       "publication_status": "published",
@@ -382,7 +372,7 @@
       ],
       "created_by": "admin-usr-1",
       "created_at": "2026-10-22T18:44:06.411Z",
-      "updated_at": "2026-10-30T18:44:06.411Z"
+      "updated_at": "2026-10-30T19:46:09.597Z"
     },
     {
       "id": "event-hindusthan-trophy-2026",

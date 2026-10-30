@@ -5,7 +5,7 @@
 > ### 👉 [https://hindusthan-events-hicet.vercel.app](https://hindusthan-events-hicet.vercel.app)
 >
 > **Status:** 🟢 **LIVE & PRODUCTION-READY**  
-> *(Hosted on Vercel with full-stack Node.js serverless execution, dynamic event routes, authentication, and QR pass generation.)*
+> *(Hosted on Vercel with full-stack Node.js serverless execution, dynamic event routes, admin password authentication, and QR pass generation.)*
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/hindusthan-events-hicet)
 
@@ -13,28 +13,27 @@ A modern full-stack web application developed for **Hindusthan Educational and C
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Architecture & Features
 
 1. **Animated College Logo Zoom-Out Intro**
    - Cinematic zoom-out reveal of the official Hindusthan Educational Trust emblem on first visit.
    - Session-cached to avoid re-triggering during internal navigation, with an instant "Intro" replay button in the navbar.
 
-2. **Independent Dynamic Event Webpages (`/events/[slug]`)**
+2. **Public Event Discovery & Dynamic Webpages (`/events/[slug]`)**
    - Unique URL generated for every event (e.g. `/events/hack-hindusthan-2026`, `/events/frame-fest-2026`, `/events/yukti-tech-symposium-2026`).
-   - Every event has its own independent theme palette (Cyberpunk Green, Festive Magenta, Electric Blue, Sports Arena Orange, Clean Minimal Slate), custom fonts, and background effects.
+   - Every event has its own independent theme palette (Cyberpunk Green, Festive Magenta, Electric Blue, Sports Arena Orange, Clean Minimal Slate), custom typography, and ambient graphics.
+   - Public visitors can browse all events, venues, schedules, and coordinators freely without any login.
 
-3. **Event-Wise Registration ON / OFF Engine**
-   - **Registration ON:** Displays registration forms, prevents duplicate signups, and issues digital event passes with encrypted verification QR codes.
+3. **Open Registration with Instant QR Code Tickets**
+   - **Registration ON:** Any student or attendee can register directly by filling out their name, email, register number, department, and contact number. Confirmed registrations instantly receive a scannable digital entry ticket pass with dynamic QR code.
    - **Registration OFF:** Displays a "Registration Closed" badge and strictly rejects direct API registration attempts with **HTTP 403 Forbidden**.
 
-4. **Admin CMS Console (`/admin`)**
-   - Live dashboard analytics (Total Events, Active Registrations, Timeline status).
-   - Event creation studio with poster upload preview, schedule timeline builder, and bespoke theme designer.
-   - 1-Click instant Registration ON/OFF switch.
-   - Participant roster management with instant **CSV spreadsheet export**.
-
-5. **Student Profile (`/profile`)**
-   - Personal registration history with digital entry passes and scannable QR tickets.
+4. **Single Admin-Only Authentication (`/login`)**
+   - Single clean login screen strictly for college administrators.
+   - Password-verified on the server using constant-time cryptographic comparison.
+   - Brute-force rate limiting and lockout protection.
+   - Cryptographically signed HMAC SHA-256 session tokens stored in secure HTTP-only cookies.
+   - Protected Admin CMS (`/admin`) for publishing events, uploading posters, editing themes, toggling registration ON/OFF, and exporting CSV rosters.
 
 ---
 
@@ -50,22 +49,12 @@ A modern full-stack web application developed for **Hindusthan Educational and C
 ```bash
 git clone https://github.com/Vignesh-SVK24/hindusthan-events-hicet.git
 cd hindusthan-events-hicet
+cp .env.example .env.local
 npm install
 npm run build
 npm start
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 🔑 Demo Credentials
-
-| Role | Email | Password | Access Rights |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@hindusthan.net` | `admin123` | Full CMS privileges, event theme customizer, registration toggles, CSV exports |
-| **Student** | `student@hindusthan.net` | `student123` | Browse events, register online, view and download QR ticket passes |
-
-*(Or use the 1-click **⚡ Admin Demo** and **⚡ Student Demo** buttons directly on the navbar & login page)*
 
 ---
 
@@ -77,4 +66,5 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **Animations:** Framer Motion, Canvas Confetti
 - **Icons:** Lucide React
 - **QR Engine:** QRCode
+- **Security:** Server-only HMAC SHA-256 signed session cookies, constant-time comparison, brute-force rate limiter
 - **Storage & Database:** File-backed persistent JSON engine with atomic transactional writes and pre-seeded college categories and events.

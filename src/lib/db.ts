@@ -29,16 +29,6 @@ const INITIAL_PROFILES: Profile[] = [
     register_number: 'FAC-ADMIN-01',
     created_at: new Date().toISOString(),
   },
-  {
-    id: 'student-usr-1',
-    full_name: 'Priya Sharma',
-    email: 'student@hindusthan.net',
-    password_hash: 'student123',
-    role: 'student',
-    department: 'Computer Science and Engineering',
-    register_number: '720721104042',
-    created_at: new Date().toISOString(),
-  },
 ];
 
 const INITIAL_EVENTS: EventItem[] = [
@@ -625,7 +615,7 @@ export function deleteEvent(id: string): boolean {
 
 export function registerUserForEvent(data: {
   event_id: string;
-  user_id: string;
+  user_id?: string;
   full_name: string;
   email: string;
   register_number: string;
@@ -656,19 +646,22 @@ export function registerUserForEvent(data: {
     }
   }
 
-  // Check unique constraint: user already registered for this event
+  // Check unique constraint: user already registered for this event by email or register number
   const existing = db.event_registrations.find(
-    (r) => r.event_id === data.event_id && (r.user_id === data.user_id || r.email.toLowerCase() === data.email.toLowerCase() || (r.register_number && r.register_number === data.register_number))
+    (r) =>
+      r.event_id === data.event_id &&
+      (r.email.toLowerCase() === data.email.toLowerCase() ||
+        (r.register_number && data.register_number && r.register_number.toLowerCase() === data.register_number.toLowerCase()))
   );
 
   if (existing) {
-    return { success: false, message: 'You are already registered for this event.' };
+    return { success: false, message: 'You are already registered for this event with this email or register number.' };
   }
 
   const newReg: EventRegistration = {
     id: `reg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     event_id: data.event_id,
-    user_id: data.user_id,
+    user_id: data.user_id || `guest-${Date.now()}`,
     full_name: data.full_name,
     email: data.email,
     register_number: data.register_number,

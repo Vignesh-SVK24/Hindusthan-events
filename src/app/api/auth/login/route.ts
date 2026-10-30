@@ -1,46 +1,71 @@
 import { NextResponse } from 'next/server';
-import { authenticateUser, createSessionToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
+import {
+  verifyAdminPassword,
+  createAdminSessionToken,
+  checkRateLimit,
+  recordFailedAttempt,
+  resetRateLimit,
+  SESSION_COOKIE,
+} from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    // Extract client IP address for brute-force rate limit protection
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    const rateCheck = checkRateLimit(ip);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: `Too many failed attempts. Login locked for security. Please try again in ${rateCheck.retryAfterSeconds} seconds.`,
+        },
+        { status: 429 }
+      );
     }
 
-    const user = authenticateUser(email, password);
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    const body = await request.json();
+    const { password } = body;
+
+    if (!password || typeof password !== 'string') {
+      recordFailedAttempt(ip);
+      return NextResponse.json({ error: 'Password is required' }, { status: 400 });
     }
 
-    const sessionUser = {
-      id: user.id,
-      full_name: user.full_name,
-      email: user.email,
-      role: user.role,
-      department: user.department,
-      register_number: user.register_number,
-    };
+    const isValid = verifyAdminPassword(password);
+    if (!isValid) {
+      recordFailedAttempt(ip);
+      return NextResponse.json(
+        { error: 'Invalid administrator password.' },
+        { status: 401 }
+      );
+    }
 
-    const token = createSessionToken(sessionUser);
+    // Reset rate limiter on successful authentication
+    resetRateLimit(ip);
 
-    const response = NextResponse.json({
-      success: true,
-      user: sessionUser,
-    });
+    // Create cryptographically signed admin session token
+    const token = createAdminSessionToken();
 
-    response.cookies.set({
-      name: 'college_hub_session',
-      value: token,
+    const cookieStore = cookies();
+    cookieStore.set(SESSION_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 7 * 24 * 60 * 60, // 7 days session
     });
 
-    return response;
+    return NextResponse.json({
+      success: true,
+      message: 'Authenticated as Administrator',
+      user: {
+        id: 'admin-root',
+        role: 'admin',
+        full_name: 'Administrator',
+      },
+    });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
