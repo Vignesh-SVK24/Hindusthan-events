@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hindusthan College Events Hub 🎓
+### Central Campus Event Discovery, Bespoke Dynamic Webpages & Real-time Registration Platform
 
-## Getting Started
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/Hindusthan-events)
 
-First, run the development server:
+A modern full-stack web application developed for **Hindusthan Educational and Charitable Trust**, Coimbatore. It provides a centralized discovery portal for all college events, an animated college logo opening sequence, dynamically generated independent webpages with bespoke themes, and a strict event-wise registration ON/OFF engine with QR code entry tickets.
 
+---
+
+## 🌟 Key Features
+
+1. **Animated College Logo Zoom-Out Intro**
+   - Cinematic zoom-out reveal of the official Hindusthan Educational Trust emblem on first visit.
+   - Session-cached to avoid re-triggering during internal navigation, with an instant "Intro" replay button in the navbar.
+
+2. **Independent Dynamic Event Webpages (`/events/[slug]`)**
+   - Unique URL generated for every event (e.g. `/events/hack-hindusthan-2026`, `/events/frame-fest-2026`, `/events/yukti-tech-symposium-2026`).
+   - Every event has its own independent theme palette (Cyberpunk Green, Festive Magenta, Electric Blue, Sports Arena Orange, Clean Minimal Slate), custom fonts, and background effects.
+
+3. **Event-Wise Registration ON / OFF Engine**
+   - **Registration ON:** Displays registration forms, prevents duplicate signups, and issues digital event passes with encrypted verification QR codes.
+   - **Registration OFF:** Displays a "Registration Closed" badge and strictly rejects direct API registration attempts with **HTTP 403 Forbidden**.
+
+4. **Admin CMS Console (`/admin`)**
+   - Live dashboard analytics (Total Events, Active Registrations, Timeline status).
+   - Event creation studio with poster upload preview, schedule timeline builder, and bespoke theme designer.
+   - 1-Click instant Registration ON/OFF switch.
+   - Participant roster management with instant **CSV spreadsheet export**.
+
+5. **Student Profile (`/profile`)**
+   - Personal registration history with digital entry passes and scannable QR tickets.
+
+---
+
+## 🚀 One-Click Live Deployment
+
+To make the platform live on the web:
+
+### Option 1: Deploy with Vercel (Recommended)
+1. Click the button below:
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/Hindusthan-events)
+2. Log in with your GitHub account (`Vignesh-SVK24`).
+3. Click **Deploy**. Vercel will automatically build and assign a free global live URL (e.g. `https://hindusthan-events.vercel.app`).
+
+### Option 2: Run Locally
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Vignesh-SVK24/Hindusthan-events.git
+cd Hindusthan-events
+npm install
+npm run build
+npm start
 ```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔑 Demo Credentials
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Role | Email | Password | Access Rights |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@hindusthan.net` | `admin123` | Full CMS privileges, event theme customizer, registration toggles, CSV exports |
+| **Student** | `student@hindusthan.net` | `student123` | Browse events, register online, view and download QR ticket passes |
 
-## Learn More
+*(Or use the 1-click **⚡ Admin Demo** and **⚡ Student Demo** buttons directly on the navbar & login page)*
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Technology Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Animations:** Framer Motion, Canvas Confetti
+- **Icons:** Lucide React
+- **QR Engine:** QRCode
+- **Storage & Database:** File-backed persistent JSON engine with atomic transactional writes and pre-seeded college categories and events.
