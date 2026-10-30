@@ -1,4 +1,4 @@
-# Hindusthan College Events Hub 🎓
+# Hindusthan College of Engineering and Technology — Events & Discovery Hub 🎓
 ### Central Campus Event Discovery, Bespoke Dynamic Webpages & Real-time Registration Platform
 
 > 🚀 **OFFICIAL LIVE APPLICATION URL:**  
@@ -9,7 +9,7 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/hindusthan-events-hicet)
 
-A modern full-stack web application developed for **Hindusthan Educational and Charitable Trust**, Coimbatore. It provides a centralized discovery portal for all college events, an animated college logo opening sequence, dynamically generated independent webpages with bespoke themes, and a strict event-wise registration ON/OFF engine with QR code entry tickets.
+A modern full-stack web application developed for **Hindusthan College of Engineering and Technology (HiCET)** under **Hindusthan Educational and Charitable Trust**, Coimbatore. It provides a centralized discovery portal for all college events, an animated college logo opening sequence, dynamically generated independent webpages with bespoke themes, and a strict event-wise registration ON/OFF engine with QR code entry tickets.
 
 ---
 
