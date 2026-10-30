@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import {
   verifyAdminPassword,
   createAdminSessionToken,
@@ -48,16 +47,7 @@ export async function POST(request: Request) {
     // Create cryptographically signed admin session token
     const token = createAdminSessionToken();
 
-    const cookieStore = cookies();
-    cookieStore.set(SESSION_COOKIE, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60, // 7 days session
-    });
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: 'Authenticated as Administrator',
       user: {
@@ -66,6 +56,18 @@ export async function POST(request: Request) {
         full_name: 'Administrator',
       },
     });
+
+    response.cookies.set({
+      name: SESSION_COOKIE,
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60, // 7 days session
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
