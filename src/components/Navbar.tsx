@@ -5,13 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { 
-  Calendar, 
   User, 
   ShieldCheck, 
   LogOut, 
   Menu, 
   X, 
-  Compass, 
   Sparkles,
   Ticket,
   ChevronDown
@@ -27,13 +25,14 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#070b19]/90 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+    <header className="sticky top-0 z-40 w-full px-3 sm:px-6 lg:px-8 pt-3 pb-2 transition-all">
+      {/* Floating Spatial Navigation Surface Container */}
+      <div className="max-w-7xl mx-auto rounded-2xl sm:rounded-full bg-white/90 backdrop-blur-xl border border-[#F0E8D4] shadow-[0_10px_30px_-5px_rgba(231,184,63,0.1),0_4px_12px_-2px_rgba(0,0,0,0.03)] px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           
-          {/* Brand Logo & College Identity */}
-          <Link href="/" className="flex items-center gap-3.5 group">
-            <div className="relative w-12 h-14 rounded-lg overflow-hidden bg-white/95 p-1 border border-amber-400/50 shadow-md transition-transform duration-300 group-hover:scale-105">
+          {/* College Identity & Logo */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-10 h-12 sm:w-12 sm:h-14 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm transition-transform duration-300 group-hover:scale-105">
               <Image
                 src="/college-logo.jpg"
                 alt="Hindusthan Logo"
@@ -43,10 +42,10 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-base sm:text-lg font-black tracking-wide text-white group-hover:text-amber-400 transition-colors uppercase leading-tight font-sans">
+              <span className="text-sm sm:text-base font-black tracking-wide text-[#252525] group-hover:text-[#C99A27] transition-colors uppercase leading-tight font-sans">
                 HINDUSTHAN
               </span>
-              <span className="text-[11px] sm:text-xs font-semibold tracking-wider text-amber-400/90 uppercase">
+              <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-[#77736A] uppercase">
                 Events & Discovery Hub
               </span>
             </div>
@@ -56,25 +55,25 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
             <Link
               href="/"
-              className="px-3.5 py-2 text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800/60 rounded-lg transition-colors"
+              className="px-3.5 py-2 text-xs lg:text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-full transition-all"
             >
               Home
             </Link>
             <Link
               href="/#events-discovery"
-              className="px-3.5 py-2 text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800/60 rounded-lg transition-colors"
+              className="px-3.5 py-2 text-xs lg:text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-full transition-all"
             >
               All Events
             </Link>
             <Link
               href="/#events-discovery"
-              className="px-3.5 py-2 text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800/60 rounded-lg transition-colors"
+              className="px-3.5 py-2 text-xs lg:text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-full transition-all"
             >
               Upcoming
             </Link>
             <Link
               href="/#about-section"
-              className="px-3.5 py-2 text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800/60 rounded-lg transition-colors"
+              className="px-3.5 py-2 text-xs lg:text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-full transition-all"
             >
               About
             </Link>
@@ -83,7 +82,7 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
               <button
                 onClick={onReplayIntro}
                 title="Replay College Logo Intro"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-300/80 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#C99A27] bg-[#FFF0B3]/50 hover:bg-[#FFE99A] border border-[#F0E8D4] rounded-full transition-all ml-1 shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Intro</span>
@@ -91,73 +90,73 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
             )}
           </nav>
 
-          {/* Right Action / Authentication Buttons */}
-          <div className="hidden md:flex items-center space-x-3">
+          {/* Right Action / Authentication Controls */}
+          <div className="hidden md:flex items-center space-x-2.5">
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-800/90 border border-slate-700/80 hover:border-slate-600 transition-all text-left"
+                  className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#FFFDF5] border border-[#F0E8D4] hover:border-[#E7B83F] shadow-sm transition-all text-left"
                 >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${
                     user.role === 'admin' 
-                      ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20' 
-                      : 'bg-blue-600 text-white'
+                      ? 'bg-[#E7B83F] text-[#252525] font-black shadow-sm' 
+                      : 'bg-[#FFF0B3] text-[#252525]'
                   }`}>
-                    {user.role === 'admin' ? <ShieldCheck className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                    {user.role === 'admin' ? <ShieldCheck className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-white max-w-[120px] truncate leading-tight">
+                    <span className="text-xs font-bold text-[#252525] max-w-[120px] truncate leading-tight">
                       {user.full_name}
                     </span>
-                    <span className={`text-[10px] font-semibold uppercase tracking-wider ${
-                      user.role === 'admin' ? 'text-amber-400' : 'text-blue-400'
+                    <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                      user.role === 'admin' ? 'text-[#C99A27]' : 'text-[#77736A]'
                     }`}>
                       {user.role}
                     </span>
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
+                  <ChevronDown className="w-3.5 h-3.5 text-[#77736A] ml-0.5" />
                 </button>
 
-                {/* Dropdown Menu */}
+                {/* Spatial Dropdown Menu */}
                 {userDropdownOpen && (
                   <div 
-                    className="absolute right-0 mt-2 w-56 rounded-xl bg-[#0c1222] border border-slate-700 shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="absolute right-0 mt-2 w-56 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#F0E8D4] shadow-[0_15px_35px_rgba(180,140,40,0.12)] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
                     onMouseLeave={() => setUserDropdownOpen(false)}
                   >
-                    <div className="px-4 py-2 border-b border-slate-800">
-                      <p className="text-xs text-slate-400">Signed in as</p>
-                      <p className="text-xs font-medium text-slate-200 truncate">{user.email}</p>
+                    <div className="px-4 py-2 border-b border-[#F0E8D4]">
+                      <p className="text-[10px] text-[#77736A]">Signed in as</p>
+                      <p className="text-xs font-semibold text-[#252525] truncate">{user.email}</p>
                     </div>
 
                     {user.role === 'admin' && (
                       <Link
                         href="/admin"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-amber-400 hover:bg-amber-500/10 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-[#C99A27] hover:bg-[#FFF9E8] transition-colors"
                       >
                         <ShieldCheck className="w-4 h-4" />
-                        Admin Dashboard
+                        Admin CMS Dashboard
                       </Link>
                     )}
 
                     <Link
                       href="/profile"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-[#252525] hover:bg-[#FFF9E8] transition-colors"
                     >
-                      <Ticket className="w-4 h-4 text-emerald-400" />
+                      <Ticket className="w-4 h-4 text-[#C99A27]" />
                       My Event Registrations
                     </Link>
 
-                    <div className="border-t border-slate-800 my-1" />
+                    <div className="border-t border-[#F0E8D4] my-1" />
 
                     <button
                       onClick={() => {
                         setUserDropdownOpen(false);
                         logout();
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
                     >
                       <LogOut className="w-4 h-4" />
                       Log out
@@ -170,14 +169,14 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
                 {/* 1-Click Fast Switch Demo Buttons */}
                 <button
                   onClick={() => quickLogin('admin')}
-                  className="px-3 py-1.5 text-xs font-semibold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 rounded-lg transition-all"
+                  className="px-3 py-1.5 text-xs font-bold text-[#252525] bg-[#FFF0B3]/60 hover:bg-[#FFE99A] border border-[#F0E8D4] rounded-full transition-all shadow-sm"
                   title="Instant Admin Access for Evaluation"
                 >
                   ⚡ Admin Demo
                 </button>
                 <button
                   onClick={() => quickLogin('student')}
-                  className="px-3 py-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/40 rounded-lg transition-all"
+                  className="px-3 py-1.5 text-xs font-bold text-[#252525] bg-[#FFF6D8] hover:bg-[#FFE99A] border border-[#F0E8D4] rounded-full transition-all shadow-sm"
                   title="Instant Student Access for Evaluation"
                 >
                   ⚡ Student Demo
@@ -185,7 +184,7 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
                 
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 rounded-lg shadow-md transition-all ml-1"
+                  className="px-4 py-2 text-xs font-black text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] rounded-full shadow-[0_4px_12px_rgba(231,184,63,0.25)] transition-all ml-0.5"
                 >
                   Sign In
                 </Link>
@@ -198,14 +197,14 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
             {onReplayIntro && (
               <button
                 onClick={onReplayIntro}
-                className="p-2 text-amber-400 bg-amber-500/10 rounded-lg"
+                className="p-2 text-[#C99A27] bg-[#FFF0B3]/50 rounded-full"
               >
                 <Sparkles className="w-4 h-4" />
               </button>
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-300 hover:text-white rounded-lg bg-slate-800/80 border border-slate-700"
+              className="p-2.5 text-[#252525] hover:text-[#C99A27] rounded-full bg-[#FFFDF5] border border-[#F0E8D4] shadow-sm"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -214,50 +213,50 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer Menu (Floating Spatial Sheet) */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-800 bg-[#070b19] px-4 pt-3 pb-6 space-y-3">
+        <div className="md:hidden mt-2 mx-auto max-w-7xl rounded-3xl border border-[#F0E8D4] bg-white/95 backdrop-blur-2xl px-5 pt-4 pb-6 space-y-3 shadow-[0_20px_40px_rgba(180,140,40,0.12)] animate-in fade-in slide-in-from-top-2 duration-200">
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg"
+            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
           >
             Home
           </Link>
           <Link
             href="/#events-discovery"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg"
+            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
           >
             All Events
           </Link>
           <Link
             href="/#about-section"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg"
+            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
           >
             About Hindusthan
           </Link>
 
           {user ? (
-            <div className="pt-2 border-t border-slate-800 space-y-2">
-              <div className="px-3 py-2 bg-slate-900 rounded-lg border border-slate-800">
-                <p className="text-xs font-bold text-white">{user.full_name}</p>
-                <p className="text-[11px] text-amber-400 uppercase font-semibold">{user.role} • {user.email}</p>
+            <div className="pt-3 border-t border-[#F0E8D4] space-y-2">
+              <div className="px-3.5 py-2.5 bg-[#FFF9E8] rounded-2xl border border-[#F0E8D4]">
+                <p className="text-xs font-black text-[#252525]">{user.full_name}</p>
+                <p className="text-[11px] text-[#C99A27] uppercase font-bold">{user.role} • {user.email}</p>
               </div>
               {user.role === 'admin' && (
                 <Link
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 text-sm font-bold text-amber-400 bg-amber-500/10 rounded-lg"
+                  className="block px-3.5 py-2.5 text-sm font-bold text-[#252525] bg-[#FFE99A] rounded-xl text-center shadow-sm"
                 >
-                  Admin Dashboard
+                  Admin CMS Dashboard
                 </Link>
               )}
               <Link
                 href="/profile"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 text-sm font-medium text-emerald-400 bg-emerald-500/10 rounded-lg"
+                className="block px-3.5 py-2.5 text-sm font-semibold text-[#252525] bg-[#FFF0B3]/50 rounded-xl"
               >
                 My Event Registrations
               </Link>
@@ -266,20 +265,20 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
                   setMobileMenuOpen(false);
                   logout();
                 }}
-                className="w-full text-left px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 rounded-lg"
+                className="w-full text-left px-3.5 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl"
               >
                 Log Out
               </button>
             </div>
           ) : (
-            <div className="pt-3 border-t border-slate-800 space-y-2">
+            <div className="pt-3 border-t border-[#F0E8D4] space-y-2.5">
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     quickLogin('admin');
                   }}
-                  className="px-3 py-2 text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center"
+                  className="px-3 py-2.5 text-xs font-bold text-[#252525] bg-[#FFF0B3]/70 border border-[#F0E8D4] rounded-xl text-center shadow-sm"
                 >
                   ⚡ Admin Demo
                 </button>
@@ -288,7 +287,7 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
                     setMobileMenuOpen(false);
                     quickLogin('student');
                   }}
-                  className="px-3 py-2 text-xs font-bold text-blue-400 bg-blue-500/10 border border-blue-500/30 rounded-lg text-center"
+                  className="px-3 py-2.5 text-xs font-bold text-[#252525] bg-[#FFF6D8] border border-[#F0E8D4] rounded-xl text-center shadow-sm"
                 >
                   ⚡ Student Demo
                 </button>
@@ -296,7 +295,7 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block w-full py-2.5 text-center text-sm font-bold text-slate-950 bg-amber-400 rounded-lg"
+                className="block w-full py-3 text-center text-sm font-black text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] rounded-2xl shadow-[0_4px_12px_rgba(231,184,63,0.25)]"
               >
                 Sign In / Register
               </Link>

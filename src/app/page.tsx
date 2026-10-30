@@ -41,21 +41,21 @@ export default function HomePage() {
   const featuredEvent = events[0];
 
   return (
-    <main className="min-h-screen bg-[#070b19] text-white flex flex-col selection:bg-amber-400 selection:text-slate-950">
+    <main className="min-h-screen bg-[#FFFDF5] text-[#252525] flex flex-col selection:bg-[#FFE99A] selection:text-[#252525]">
       {/* Opening Animated College Logo Zoom-Out Intro */}
       <LogoIntro forceShow={replayIntro} onComplete={() => setReplayIntro(false)} />
 
-      {/* Main Navbar */}
+      {/* Spatial Floating Navbar */}
       <Navbar onReplayIntro={() => setReplayIntro(true)} />
 
-      {/* Main Hero Section */}
+      {/* Spatial Hero Section */}
       <HeroSection featuredEvent={featuredEvent} totalEventsCount={events.length} />
 
       {/* Central Event Discovery & Categorized Rectangular Divisions */}
       {loading ? (
         <div className="py-24 text-center">
-          <div className="inline-block w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-slate-400 text-sm">Loading college events directory...</p>
+          <div className="inline-block w-8 h-8 border-4 border-[#E7B83F] border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-[#77736A] text-xs sm:text-sm font-semibold">Loading college events directory...</p>
         </div>
       ) : (
         <EventDiscovery initialEvents={events} categories={categories} />

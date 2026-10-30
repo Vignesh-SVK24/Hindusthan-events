@@ -3,30 +3,53 @@
 @tailwind utilities;
 
 :root {
-  --background: #070b19;
-  --foreground: #f8fafc;
+  /* Core Spatial UI Palette */
+  --bg-main: #FFFDF5;
+  --bg-secondary: #FFF9E8;
+  --yellow-light: #FFF0B3;
+  --yellow-soft: #FFE99A;
+  --cream-warm: #FFF6D8;
+  --gold-accent: #E7B83F;
+  --gold-dark: #C99A27;
+  --text-primary: #252525;
+  --text-secondary: #77736A;
+  --surface-white: #FFFFFF;
+  --border-subtle: #F0E8D4;
+  --border-focus: #E7B83F;
+
+  /* Spatial Shadows */
+  --shadow-spatial-sm: 0 2px 8px -1px rgba(180, 140, 40, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-spatial: 0 10px 25px -4px rgba(180, 140, 40, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+  --shadow-spatial-lg: 0 20px 35px -6px rgba(180, 140, 40, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
+  --shadow-spatial-float: 0 25px 50px -12px rgba(180, 140, 40, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text-primary);
+  background-color: var(--bg-main);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbars */
+/* Custom Spatial Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #070b19;
+  background: #FFFDF5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: #F0E8D4;
+  border-radius: 9999px;
+  border: 2px solid #FFFDF5;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #f59e0b;
+  background: #E7B83F;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -35,4 +58,50 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Spatial Glass Surface Utilities */
+@layer utilities {
+  .spatial-surface {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-spatial);
+  }
+
+  .spatial-panel {
+    background: var(--surface-white);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-spatial-sm);
+  }
+
+  .spatial-pill {
+    background: var(--cream-warm);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+
+  .spatial-pill-active {
+    background: var(--yellow-soft);
+    border: 1px solid var(--gold-accent);
+    color: #1a1a1a;
+    box-shadow: 0 4px 12px rgba(231, 184, 63, 0.25);
+  }
+
+  .spatial-glow {
+    position: relative;
+  }
+  .spatial-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(231, 184, 63, 0.4), transparent 60%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
 }
