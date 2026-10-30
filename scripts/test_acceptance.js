@@ -58,19 +58,19 @@ async function runAcceptanceTests() {
   const eventsRes = await request('http://localhost:3000/api/events?publicOnly=true');
   console.log(`✅ Loaded ${eventsRes.body.events.length} Published College Events`);
 
-  // Test 3: Admin Login & Session Cookie
-  console.log('\nTEST 3: Admin Authentication...');
+  // Test 3: Admin Password Authentication
+  console.log('\nTEST 3: Admin Password Authentication...');
   const adminLoginRes = await request('http://localhost:3000/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: { email: 'admin@hindusthan.net', password: 'admin123' },
+    body: { password: process.env.ADMIN_PASSWORD || 'hiceteventz' },
   });
   if (adminLoginRes.statusCode !== 200 || !adminLoginRes.body.success) {
     throw new Error('Admin login failed');
   }
   const setCookie = adminLoginRes.headers['set-cookie'];
   const cookieHeader = Array.isArray(setCookie) ? setCookie.map(c => c.split(';')[0]).join('; ') : setCookie.split(';')[0];
-  console.log(`✅ Admin logged in: "${adminLoginRes.body.user.full_name}" (${adminLoginRes.body.user.role})`);
+  console.log(`✅ Admin authenticated successfully: role="${adminLoginRes.body.user.role}"`);
 
   // Test 4: Admin Stats
   console.log('\nTEST 4: Admin Dashboard Stats...');
@@ -99,29 +99,17 @@ async function runAcceptanceTests() {
     console.log('✅ Confirmed: Both event pages have completely independent bespoke visual palettes!');
   }
 
-  // Test 6: Student Login
-  console.log('\nTEST 6: Student Authentication...');
-  const studentLoginRes = await request('http://localhost:3000/api/auth/login', {
+  // Test 6: Registration OFF Enforcement (Should reject with 403 Forbidden)
+  console.log('\nTEST 6: Enforcing Registration OFF System Rule...');
+  const offAttempt = await request('http://localhost:3000/api/events/ai-cloud-native-workshop-2026/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: { email: 'student@hindusthan.net', password: 'student123' },
-  });
-  const studentCookie = (Array.isArray(studentLoginRes.headers['set-cookie'])
-    ? studentLoginRes.headers['set-cookie'].map(c => c.split(';')[0]).join('; ')
-    : studentLoginRes.headers['set-cookie'].split(';')[0]);
-  console.log(`✅ Student logged in: "${studentLoginRes.body.user.full_name}" (${studentLoginRes.body.user.department})`);
-
-  // Test 7: Registration OFF Enforcement (Should reject with 403 Forbidden)
-  console.log('\nTEST 7: Enforcing Registration OFF System Rule...');
-  const offAttempt = await request('http://localhost:3000/api/events/yukti-tech-symposium-2026/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Cookie: studentCookie },
     body: {
-      full_name: 'Priya Sharma',
-      email: 'student@hindusthan.net',
-      register_number: '720721104042',
-      department: 'CSE',
-      year: '4th Year',
+      full_name: 'Test Visitor',
+      email: 'visitor@hindusthan.net',
+      register_number: '720721104999',
+      department: 'ECE',
+      year: '3rd Year',
       contact_number: '+91 98765 43210',
     },
   });
@@ -131,52 +119,59 @@ async function runAcceptanceTests() {
     throw new Error(`Expected HTTP 403, got ${offAttempt.statusCode}`);
   }
 
-  // Test 8: Registration ON Execution
-  console.log('\nTEST 8: Registering Student for Registration ON Event (Frame Fest)...');
+  // Test 7: Public Open Registration (Without Student Account)
+  console.log('\nTEST 7: Public Open Registration on Frame Fest...');
+  const regTimestamp = Date.now();
+  const regPayload = {
+    full_name: 'Campus Participant',
+    email: `attendee_${regTimestamp}@hindusthan.net`,
+    register_number: `REG${regTimestamp.toString().slice(-6)}`,
+    department: 'Computer Science and Engineering',
+    year: '4th Year',
+    contact_number: '+91 98765 43210',
+  };
   const regAttempt = await request('http://localhost:3000/api/events/frame-fest-2026/register', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Cookie: studentCookie },
-    body: {
-      full_name: 'Priya Sharma',
-      email: 'student@hindusthan.net',
-      register_number: '720721104042',
-      department: 'Computer Science and Engineering',
-      year: '4th Year',
-      contact_number: '+91 98765 43210',
-    },
+    headers: { 'Content-Type': 'application/json' },
+    body: regPayload,
   });
   if (regAttempt.statusCode === 200 && regAttempt.body.success) {
-    console.log(`✅ Registration confirmed! Ticket ID: ${regAttempt.body.registration.id}`);
+    console.log(`✅ Public registration confirmed! Ticket ID: ${regAttempt.body.registration.id}`);
   } else {
-    console.log(`Note: ${regAttempt.body.error || 'Already registered'}`);
+    throw new Error(`Registration failed: ${regAttempt.body.error}`);
   }
 
-  // Test 9: Duplicate Registration Prevention
-  console.log('\nTEST 9: Preventing Duplicate Registration...');
+  // Test 8: Duplicate Registration Prevention
+  console.log('\nTEST 8: Preventing Duplicate Registration...');
   const duplicateAttempt = await request('http://localhost:3000/api/events/frame-fest-2026/register', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Cookie: studentCookie },
-    body: {
-      full_name: 'Priya Sharma',
-      email: 'student@hindusthan.net',
-      register_number: '720721104042',
-      department: 'CSE',
-      year: '4th Year',
-      contact_number: '+91 98765 43210',
-    },
+    headers: { 'Content-Type': 'application/json' },
+    body: regPayload,
   });
   if (duplicateAttempt.statusCode === 400 && duplicateAttempt.body.error.includes('already registered')) {
     console.log(`✅ Duplicate registration successfully blocked: "${duplicateAttempt.body.error}"`);
+  } else {
+    throw new Error('Duplicate registration was not blocked');
   }
 
-  // Test 10: Participant List & CSV Export
-  console.log('\nTEST 10: Admin CSV Export of Participant Registrations...');
+  // Test 9: Participant List & CSV Export
+  console.log('\nTEST 9: Admin CSV Export of Participant Registrations...');
   const csvRes = await request('http://localhost:3000/api/admin/registrations?format=csv', {
     headers: { Cookie: cookieHeader },
   });
   if (csvRes.statusCode === 200 && typeof csvRes.body === 'string' && csvRes.body.includes('Event Title')) {
     console.log('✅ CSV Export generated successfully with participant details:');
     console.log(csvRes.body.trim().split('\n').slice(0, 3).join('\n'));
+  }
+
+  // Test 10: Verify Dead Student Routes are 404
+  console.log('\nTEST 10: Verifying Dead Routes Return 404...');
+  const profileRes = await request('http://localhost:3000/profile');
+  const userRegsRes = await request('http://localhost:3000/api/user/registrations');
+  if (profileRes.statusCode === 404 && userRegsRes.statusCode === 404) {
+    console.log('✅ Dead student routes (/profile and /api/user/registrations) cleanly return 404 Not Found');
+  } else {
+    throw new Error('Dead student routes still active');
   }
 
   console.log('\n====================================================');
