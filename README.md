@@ -1,6 +1,12 @@
 # Hindusthan College Events Hub 🎓
 ### Central Campus Event Discovery, Bespoke Dynamic Webpages & Real-time Registration Platform
 
+> 🚀 **OFFICIAL LIVE APPLICATION URL:**  
+> ### 👉 [https://hindusthan-events-hicet.vercel.app](https://hindusthan-events-hicet.vercel.app)
+>
+> **Status:** 🟢 **LIVE & PRODUCTION-READY**  
+> *(Hosted on Vercel with full-stack Node.js serverless execution, dynamic event routes, authentication, and QR pass generation.)*
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/hindusthan-events-hicet)
 
 A modern full-stack web application developed for **Hindusthan Educational and Charitable Trust**, Coimbatore. It provides a centralized discovery portal for all college events, an animated college logo opening sequence, dynamically generated independent webpages with bespoke themes, and a strict event-wise registration ON/OFF engine with QR code entry tickets.
@@ -32,17 +38,15 @@ A modern full-stack web application developed for **Hindusthan Educational and C
 
 ---
 
-## 🚀 One-Click Live Deployment
+## 🌐 Live Web Addresses
 
-To make the platform live on the web:
+- **Production Live URL (Vercel):** [https://hindusthan-events-hicet.vercel.app](https://hindusthan-events-hicet.vercel.app)
+- **GitHub Repository:** [https://github.com/Vignesh-SVK24/hindusthan-events-hicet](https://github.com/Vignesh-SVK24/hindusthan-events-hicet)
 
-### Option 1: Deploy with Vercel (Recommended)
-1. Click the button below:
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vignesh-SVK24/hindusthan-events-hicet)
-2. Log in with your GitHub account (`Vignesh-SVK24`).
-3. Click **Deploy**. Vercel will automatically build and assign a free global live URL (e.g. `https://hindusthan-events-hicet.vercel.app`).
+---
 
-### Option 2: Run Locally
+## 🚀 Run Locally
+
 ```bash
 git clone https://github.com/Vignesh-SVK24/hindusthan-events-hicet.git
 cd hindusthan-events-hicet
@@ -69,7 +73,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 - **Framework:** Next.js 14 (App Router)
 - **Language:** TypeScript
-- **Styling:** Tailwind CSS
+- **Styling:** Tailwind CSS (Spatial UI design system)
 - **Animations:** Framer Motion, Canvas Confetti
 - **Icons:** Lucide React
 - **QR Engine:** QRCode
