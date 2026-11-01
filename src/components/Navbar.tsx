@@ -67,7 +67,13 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
               href="/#events-discovery"
               className="px-3.5 py-2 text-xs lg:text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-full transition-all"
             >
-              Upcoming
+              Upcoming Events
+            </Link>
+            <Link
+              href="/event-archives"
+              className="px-3.5 py-2 text-xs lg:text-sm font-bold text-[#C99A27] bg-[#FFF9E8] border border-[#F0E8D4] hover:bg-[#FFE99A] hover:text-[#252525] rounded-full transition-all shadow-xs"
+            >
+              AIML Event Archives
             </Link>
             <Link
               href="/#about-section"
@@ -161,11 +167,25 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
             All Events
           </Link>
           <Link
+            href="/#events-discovery"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
+          >
+            Upcoming Events
+          </Link>
+          <Link
+            href="/event-archives"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2.5 text-sm font-bold text-[#C99A27] bg-[#FFF9E8] rounded-xl"
+          >
+            AIML Event Archives
+          </Link>
+          <Link
             href="/#about-section"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
           >
-            About Hindusthan
+            About
           </Link>
 
           <div className="pt-3 border-t border-[#F0E8D4]">

@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import EventDiscovery from '@/components/EventDiscovery';
 import AboutSection from '@/components/AboutSection';
+import AimlArchiveBanner from '@/components/AimlArchiveBanner';
 import Footer from '@/components/Footer';
 import LogoIntro from '@/components/LogoIntro';
 import { EventItem, EventCategory, EventTheme } from '@/lib/types';
@@ -60,6 +61,9 @@ export default function HomePage() {
       ) : (
         <EventDiscovery initialEvents={events} categories={categories} />
       )}
+
+      {/* AIML Historical Archives Highlight */}
+      <AimlArchiveBanner />
 
       {/* Institutional About Section */}
       <AboutSection />

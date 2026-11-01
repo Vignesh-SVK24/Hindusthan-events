@@ -129,6 +129,25 @@ export interface EventRegistration {
   created_at: string;
 }
 
+export interface EventArchive {
+  id: string;
+  original_serial_number: string;
+  event_name: string;
+  slug: string;
+  resource_person: string;
+  resource_person_name?: string;
+  resource_person_designation?: string;
+  event_coordinators: string;
+  event_date_original: string;
+  event_date_parsed?: string;
+  photo_url?: string | null;
+  geo_tag?: string | null;
+  academic_year: string;
+  source_document: string;
+  created_at: string;
+  notes?: string;
+}
+
 export interface DatabaseSchema {
   profiles: Profile[];
   event_categories: EventCategory[];
@@ -136,4 +155,5 @@ export interface DatabaseSchema {
   event_themes: EventTheme[];
   event_media: EventMedia[];
   event_registrations: EventRegistration[];
+  event_archives: EventArchive[];
 }

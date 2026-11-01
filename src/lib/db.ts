@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { DatabaseSchema, EventItem, EventTheme, EventRegistration, Profile, EventCategory, EventMedia } from './types';
+import { DatabaseSchema, EventItem, EventTheme, EventRegistration, Profile, EventCategory, EventMedia, EventArchive } from './types';
 import { THEME_PRESETS } from './themePresets';
+import { INITIAL_EVENT_ARCHIVES } from './initialArchives';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'college_events.json');
@@ -392,6 +393,7 @@ function getInitialData(): DatabaseSchema {
     event_themes: INITIAL_THEMES,
     event_media: INITIAL_MEDIA,
     event_registrations: INITIAL_REGISTRATIONS,
+    event_archives: INITIAL_EVENT_ARCHIVES,
   };
 }
 
@@ -414,6 +416,11 @@ export function getDatabase(): DatabaseSchema {
 
     const raw = fs.readFileSync(DB_FILE, 'utf-8');
     cachedDb = JSON.parse(raw);
+    if (!cachedDb || !cachedDb.event_archives || cachedDb.event_archives.length === 0) {
+      if (cachedDb) {
+        cachedDb.event_archives = INITIAL_EVENT_ARCHIVES;
+      }
+    }
     return cachedDb!;
   } catch (error) {
     console.error('Error reading database file, using in-memory fallback:', error);
@@ -716,4 +723,99 @@ export function getAdminStats() {
     regDisabled,
     totalRegistrations,
   };
+}
+
+// ----------------- Event Archives CRUD operations -----------------
+
+export function getAllEventArchives(options?: {
+  academic_year?: string;
+  year?: string;
+  month?: string;
+  search?: string;
+}): EventArchive[] {
+  const db = getDatabase();
+  let archives = [...(db.event_archives || [])];
+
+  if (options?.academic_year && options.academic_year !== 'all') {
+    archives = archives.filter((a) => a.academic_year === options.academic_year);
+  }
+
+  if (options?.year && options.year !== 'all') {
+    archives = archives.filter((a) => {
+      const parsedYear = a.event_date_parsed?.split('-')[0] || '';
+      return parsedYear === options.year || a.event_date_original.includes(options.year!);
+    });
+  }
+
+  if (options?.month && options.month !== 'all') {
+    archives = archives.filter((a) => {
+      if (!a.event_date_parsed) return false;
+      const monthPart = a.event_date_parsed.split('-')[1];
+      return monthPart === options.month;
+    });
+  }
+
+  if (options?.search) {
+    const q = options.search.toLowerCase();
+    archives = archives.filter(
+      (a) =>
+        a.event_name.toLowerCase().includes(q) ||
+        a.resource_person.toLowerCase().includes(q) ||
+        a.event_coordinators.toLowerCase().includes(q) ||
+        a.original_serial_number.toLowerCase().includes(q) ||
+        a.event_date_original.toLowerCase().includes(q)
+    );
+  }
+
+  return archives;
+}
+
+export function getEventArchiveBySlug(slug: string): EventArchive | null {
+  const db = getDatabase();
+  return (db.event_archives || []).find((a) => a.slug === slug) || null;
+}
+
+export function getEventArchiveById(id: string): EventArchive | null {
+  const db = getDatabase();
+  return (db.event_archives || []).find((a) => a.id === id) || null;
+}
+
+export function createEventArchive(data: Omit<EventArchive, 'id' | 'created_at'>): EventArchive {
+  const db = getDatabase();
+  const newArchive: EventArchive = {
+    ...data,
+    id: `aiml-arch-${Date.now()}`,
+    created_at: new Date().toISOString(),
+  };
+
+  db.event_archives = db.event_archives || [];
+  db.event_archives.push(newArchive);
+  saveDatabase(db);
+  return newArchive;
+}
+
+export function updateEventArchive(id: string, updates: Partial<EventArchive>): EventArchive | null {
+  const db = getDatabase();
+  db.event_archives = db.event_archives || [];
+  const index = db.event_archives.findIndex((a) => a.id === id);
+  if (index === -1) return null;
+
+  db.event_archives[index] = {
+    ...db.event_archives[index],
+    ...updates,
+  };
+  saveDatabase(db);
+  return db.event_archives[index];
+}
+
+export function deleteEventArchive(id: string): boolean {
+  const db = getDatabase();
+  db.event_archives = db.event_archives || [];
+  const initialLength = db.event_archives.length;
+  db.event_archives = db.event_archives.filter((a) => a.id !== id);
+  if (db.event_archives.length !== initialLength) {
+    saveDatabase(db);
+    return true;
+  }
+  return false;
 }

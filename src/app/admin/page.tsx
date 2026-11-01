@@ -25,15 +25,17 @@ import {
   ToggleRight,
   ExternalLink,
   Clock,
-  AlertCircle
+  AlertCircle,
+  History
 } from 'lucide-react';
 import { EventItem, EventCategory, EventTheme, ThemePreset } from '@/lib/types';
 import { THEME_PRESETS } from '@/lib/themePresets';
+import AdminArchiveManager from '@/components/AdminArchiveManager';
 
 export default function AdminPage() {
   const { user, isAdmin, isLoading, logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'create' | 'registrations'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'create' | 'registrations' | 'archives'>('overview');
   const [stats, setStats] = useState<any>(null);
   const [events, setEvents] = useState<(EventItem & { category?: EventCategory; theme?: EventTheme; registration_count?: number })[]>([]);
   const [categories, setCategories] = useState<EventCategory[]>([]);
@@ -480,6 +482,18 @@ export default function AdminPage() {
           >
             <Users className="w-4 h-4" />
             <span>Registrations ({registrations.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('archives')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all ${
+              activeTab === 'archives'
+                ? 'bg-[#FFE99A] text-[#252525] border border-[#E7B83F] shadow-[0_4px_12px_rgba(231,184,63,0.25)]'
+                : 'text-[#77736A] hover:text-[#252525] bg-white border border-[#F0E8D4] shadow-sm'
+            }`}
+          >
+            <History className="w-4 h-4 text-[#C99A27]" />
+            <span>Manage Event Archives</span>
           </button>
         </div>
 
@@ -1254,6 +1268,11 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* TAB 5: AIML EVENT ARCHIVES */}
+        {activeTab === 'archives' && (
+          <AdminArchiveManager />
         )}
 
       </div>

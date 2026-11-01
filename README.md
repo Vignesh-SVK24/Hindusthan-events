@@ -35,6 +35,21 @@ A modern full-stack web application developed for **Hindusthan College of Engine
    - Cryptographically signed HMAC SHA-256 session tokens stored in secure HTTP-only cookies.
    - Protected Admin CMS (`/admin`) for publishing events, uploading posters, editing themes, toggling registration ON/OFF, and exporting CSV rosters.
 
+5. **AIML Event Archives (`/event-archives`)**
+   - Official historical registry showcasing events, workshops, technical sessions, and seminars conducted by the Department of Artificial Intelligence and Machine Learning (AIML).
+   - Authoritative source documentation: `2025-2026 AIML EVENT DETAILS CONSOLIDATED.docx`.
+   - Exact preservation of original event titles, dates, resource persons, faculty coordinators, and original numbering irregularities.
+   - High-resolution event photographs and GPS geo-tagged field verification photos.
+   - Dedicated dynamic historical pages (`/event-archives/[slug]`) strictly separated from live upcoming events.
+   - Comprehensive Admin CMS management under "Manage Event Archives".
+
+---
+
+## 🏛️ Departmental Initiative & Attribution
+
+- **Organized by:** Department of Artificial Intelligence and Machine Learning (AIML)
+- **Developed by:** Vignesh S — AIML
+
 ---
 
 ## 🌐 Live Web Addresses

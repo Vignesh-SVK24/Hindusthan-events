@@ -110,6 +110,30 @@ export default function AboutSection() {
 
         </div>
 
+        {/* Department of AIML Initiative & Attribution Box */}
+        <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial-md flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#FFF9E8] border border-[#F0E8D4] flex items-center justify-center text-[#C99A27] font-black text-lg shadow-xs shrink-0">
+              AI
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-[#C99A27] uppercase tracking-wider">Departmental Initiative</p>
+              <h4 className="text-sm sm:text-base font-black text-[#252525]">Department of Artificial Intelligence and Machine Learning (AIML)</h4>
+              <p className="text-xs text-[#77736A] mt-0.5">Hindusthan College of Engineering and Technology, Coimbatore</p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3 text-xs w-full md:w-auto">
+            <div className="px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] w-full sm:w-auto text-center sm:text-left">
+              <span className="text-[#77736A] font-medium mr-1.5">Organized by:</span>
+              <span className="font-bold text-[#252525]">Department of Artificial Intelligence and Machine Learning (AIML)</span>
+            </div>
+            <div className="px-4 py-2.5 rounded-2xl bg-[#FFF0B3]/50 border border-[#FFE99A] text-[#252525] w-full sm:w-auto text-center sm:text-left shadow-xs">
+              <span className="text-[#77736A] font-medium mr-1.5">Developed by:</span>
+              <span className="font-black text-[#C99A27]">Vignesh S — AIML</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   );

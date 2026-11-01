@@ -32,10 +32,13 @@ export default function Footer() {
           <Link href="/" className="hover:text-[#C99A27] transition-colors">
             Home
           </Link>
-          <a href="#events-discovery" className="hover:text-[#C99A27] transition-colors">
+          <a href="/#events-discovery" className="hover:text-[#C99A27] transition-colors">
             Event Directory
           </a>
-          <a href="#about-section" className="hover:text-[#C99A27] transition-colors">
+          <Link href="/event-archives" className="text-[#C99A27] hover:text-[#B38318] font-bold transition-colors">
+            AIML Event Archives
+          </Link>
+          <a href="/#about-section" className="hover:text-[#C99A27] transition-colors">
             Campus Infrastructure
           </a>
           <Link href="/admin" className="text-[#C99A27] hover:text-[#B38318] font-black flex items-center gap-1.5 transition-colors">
@@ -49,6 +52,18 @@ export default function Footer() {
           <span>Spatial UI Experience • Powered by Hindusthan Trust</span>
         </div>
 
+      </div>
+
+      {/* Department Initiative & Attribution Banner */}
+      <div className="max-w-7xl mx-auto pt-6 mt-8 border-t border-[#F0E8D4]/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-2 text-[#77736A]">
+          <span className="font-bold text-[#252525]">Organized by:</span>
+          <span>Department of Artificial Intelligence and Machine Learning (AIML)</span>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9E8] border border-[#F0E8D4] text-[#252525] shadow-xs">
+          <span className="text-[#77736A] font-semibold">Developed by:</span>
+          <span className="font-bold text-[#C99A27]">Vignesh S — AIML</span>
+        </div>
       </div>
     </footer>
   );
