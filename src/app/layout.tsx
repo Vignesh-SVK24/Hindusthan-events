@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import SpatialBackground from '@/components/SpatialBackground';
 
 export const metadata: Metadata = {
   title: 'HINDUSTHAN COLLEGE OF ENGINEERING AND TECHNOLOGY — Events & Discovery Hub',
@@ -60,7 +61,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased bg-[#FFFDF5] text-[#252525] selection:bg-[#FFE99A] selection:text-[#252525]">
+      <body className="antialiased bg-[#FFFDF5] text-[#252525] selection:bg-[#FFE99A] selection:text-[#252525] relative min-h-screen">
+        <SpatialBackground />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
