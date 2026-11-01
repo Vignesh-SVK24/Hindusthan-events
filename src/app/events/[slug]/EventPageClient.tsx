@@ -334,12 +334,10 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
                         <p className="font-mono font-bold text-[#252525]">Ticket Ref: #{registrationData?.id.slice(-8).toUpperCase()}</p>
                         <p className="text-[#77736A]">Reg No: {registrationData?.register_number}</p>
                         <p className="text-[#77736A]">Student: {registrationData?.full_name}</p>
-                        <Link 
-                          href="/profile" 
-                          className="inline-flex items-center gap-1 text-[#C99A27] hover:underline font-bold pt-1"
-                        >
-                          View Full Pass in Profile →
-                        </Link>
+                        <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-[11px] pt-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Digital Pass Verified & Active</span>
+                        </span>
                       </div>
                     </div>
                   </div>

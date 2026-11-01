@@ -92,21 +92,21 @@ export default function HeroSection({ featuredEvent, totalEventsCount }: HeroSec
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="grid grid-cols-3 gap-3 pt-6 max-w-lg mx-auto lg:mx-0"
+              className="grid grid-cols-3 gap-2 sm:gap-3 pt-6 max-w-lg mx-auto lg:mx-0"
             >
-              <div className="p-3.5 rounded-2xl bg-white/80 border border-[#F0E8D4] shadow-spatial-sm text-center lg:text-left">
-                <p className="text-xl sm:text-2xl font-black text-[#252525]">{totalEventsCount}+</p>
-                <p className="text-[11px] text-[#77736A] font-semibold mt-0.5">Published Events</p>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/85 border border-[#F0E8D4] shadow-spatial-sm text-center lg:text-left">
+                <p className="text-lg sm:text-2xl font-black text-[#252525]">{totalEventsCount}+</p>
+                <p className="text-[10px] sm:text-[11px] text-[#77736A] font-semibold mt-0.5 leading-tight">Published Events</p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/80 border border-[#F0E8D4] shadow-spatial-sm text-center lg:text-left">
-                <p className="text-xl sm:text-2xl font-black text-[#C99A27]">100%</p>
-                <p className="text-[11px] text-[#77736A] font-semibold mt-0.5">Bespoke Themes</p>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/85 border border-[#F0E8D4] shadow-spatial-sm text-center lg:text-left">
+                <p className="text-lg sm:text-2xl font-black text-[#C99A27]">100%</p>
+                <p className="text-[10px] sm:text-[11px] text-[#77736A] font-semibold mt-0.5 leading-tight">Bespoke Themes</p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/80 border border-[#F0E8D4] shadow-spatial-sm text-center lg:text-left">
-                <p className="text-xl sm:text-2xl font-black text-emerald-600">Live</p>
-                <p className="text-[11px] text-[#77736A] font-semibold mt-0.5">QR Entry System</p>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/85 border border-[#F0E8D4] shadow-spatial-sm text-center lg:text-left">
+                <p className="text-lg sm:text-2xl font-black text-emerald-600">Live</p>
+                <p className="text-[10px] sm:text-[11px] text-[#77736A] font-semibold mt-0.5 leading-tight">QR Entry System</p>
               </div>
             </motion.div>
 

@@ -146,9 +146,10 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
         {/* Status Filter Dropdown */}
         <div className="lg:col-span-3">
           <select
+            aria-label="Filter events by status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] shadow-spatial-sm cursor-pointer"
+            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm cursor-pointer transition-all"
           >
             <option value="all">All Timelines</option>
             <option value="upcoming">Upcoming Events</option>
@@ -160,9 +161,10 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
         {/* Sort Dropdown */}
         <div className="lg:col-span-3">
           <select
+            aria-label="Sort events"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'date' | 'newest')}
-            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] shadow-spatial-sm cursor-pointer"
+            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm cursor-pointer transition-all"
           >
             <option value="date">Sort by Event Date</option>
             <option value="newest">Sort by Recently Added</option>

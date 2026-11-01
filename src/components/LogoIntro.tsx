@@ -144,7 +144,7 @@ export default function LogoIntro({ onComplete, forceShow = false }: LogoIntroPr
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
           onClick={handleSkip}
-          className="absolute bottom-8 right-8 z-20 px-5 py-2.5 text-xs font-bold tracking-wider text-[#252525] bg-white/85 hover:bg-white border border-[#F0E8D4] hover:border-[#E7B83F] rounded-full shadow-[0_4px_16px_rgba(231,184,63,0.15)] backdrop-blur-md transition-all duration-200 transform hover:-translate-y-0.5"
+          className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 z-20 px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-bold tracking-wider text-[#252525] bg-white/90 hover:bg-white border border-[#F0E8D4] hover:border-[#E7B83F] rounded-full shadow-[0_4px_16px_rgba(231,184,63,0.15)] backdrop-blur-md transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
         >
           Skip Intro →
         </motion.button>

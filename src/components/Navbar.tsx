@@ -28,22 +28,22 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
         <div className="flex items-center justify-between h-16 sm:h-20">
           
           {/* College Identity & Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-12 sm:w-12 sm:h-14 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm transition-transform duration-300 group-hover:scale-105">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
+            <div className="relative w-9 h-11 xs:w-10 xs:h-12 sm:w-12 sm:h-14 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0">
               <Image
                 src="/college-logo.jpg"
                 alt="Hindusthan Logo"
                 fill
                 priority
                 className="object-contain p-0.5"
-                sizes="48px"
+                sizes="(max-width: 640px) 40px, 48px"
               />
             </div>
-            <div className="flex flex-col max-w-[190px] xs:max-w-[240px] sm:max-w-md md:max-w-none">
-              <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-tight text-[#252525] group-hover:text-[#C99A27] transition-colors uppercase leading-tight font-sans">
+            <div className="flex flex-col min-w-0 max-w-[210px] xs:max-w-[260px] sm:max-w-md md:max-w-none">
+              <span className="text-[10px] xs:text-[11px] sm:text-xs md:text-sm font-black tracking-tight text-[#252525] group-hover:text-[#C99A27] transition-colors uppercase leading-[1.15] font-sans">
                 HINDUSTHAN COLLEGE OF ENGINEERING AND TECHNOLOGY
               </span>
-              <span className="text-[9px] sm:text-[10px] md:text-[11px] font-bold tracking-wider text-[#77736A] uppercase">
+              <span className="text-[8.5px] xs:text-[9.5px] sm:text-[10px] md:text-[11px] font-bold tracking-wider text-[#77736A] uppercase mt-0.5">
                 Events & Discovery Hub
               </span>
             </div>
@@ -151,39 +151,39 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
 
       {/* Mobile Drawer Menu (Floating Spatial Sheet) */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-2 mx-auto max-w-7xl rounded-3xl border border-[#F0E8D4] bg-white/95 backdrop-blur-2xl px-5 pt-4 pb-6 space-y-3 shadow-[0_20px_40px_rgba(180,140,40,0.12)] animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="md:hidden mt-2 mx-auto max-w-7xl rounded-3xl border border-[#F0E8D4] bg-white/95 backdrop-blur-2xl p-4 sm:p-5 space-y-1.5 shadow-[0_20px_40px_rgba(180,140,40,0.12)] animate-in fade-in slide-in-from-top-2 duration-200">
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
+            className="block px-4 py-2.5 text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-xl transition-colors"
           >
             Home
           </Link>
           <Link
             href="/#events-discovery"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
+            className="block px-4 py-2.5 text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-xl transition-colors"
           >
             All Events
           </Link>
           <Link
             href="/#events-discovery"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
+            className="block px-4 py-2.5 text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-xl transition-colors"
           >
             Upcoming Events
           </Link>
           <Link
             href="/event-archives"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 text-sm font-bold text-[#C99A27] bg-[#FFF9E8] rounded-xl"
+            className="block px-4 py-2.5 text-sm font-bold text-[#C99A27] bg-[#FFF9E8] border border-[#F0E8D4] hover:bg-[#FFE99A] hover:text-[#252525] rounded-xl transition-all shadow-xs"
           >
             AIML Event Archives
           </Link>
           <Link
             href="/#about-section"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 text-sm font-semibold text-[#252525] hover:bg-[#FFF9E8] rounded-xl"
+            className="block px-4 py-2.5 text-sm font-semibold text-[#252525] hover:text-[#C99A27] hover:bg-[#FFF9E8] rounded-xl transition-colors"
           >
             About
           </Link>

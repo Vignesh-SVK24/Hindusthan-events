@@ -186,7 +186,7 @@ export default function EventArchivesPage() {
                 aria-label="Filter by Academic Year"
                 value={selectedAcademicYear}
                 onChange={(e) => setSelectedAcademicYear(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-xs font-semibold text-[#252525] focus:outline-none focus:border-[#E7B83F] transition-all cursor-pointer"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-xs font-semibold text-[#252525] focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/40 transition-all cursor-pointer"
               >
                 <option value="all">Academic Year: All (2025–2026)</option>
                 <option value="2025-2026">Academic Year 2025–2026</option>
@@ -199,7 +199,7 @@ export default function EventArchivesPage() {
                 aria-label="Filter by Calendar Year"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-xs font-semibold text-[#252525] focus:outline-none focus:border-[#E7B83F] transition-all cursor-pointer"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-xs font-semibold text-[#252525] focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/40 transition-all cursor-pointer"
               >
                 <option value="all">Year: All Years</option>
                 <option value="2025">2025 (15 Events)</option>
@@ -213,7 +213,7 @@ export default function EventArchivesPage() {
                 aria-label="Filter by Month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-xs font-semibold text-[#252525] focus:outline-none focus:border-[#E7B83F] transition-all cursor-pointer"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-xs font-semibold text-[#252525] focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/40 transition-all cursor-pointer"
               >
                 <option value="all">Month: All Months</option>
                 <option value="06">June</option>
@@ -262,7 +262,7 @@ export default function EventArchivesPage() {
             {filteredArchives.map((archive) => (
               <article
                 key={archive.id}
-                className="group flex flex-col justify-between rounded-3xl bg-white border border-[#F0E8D4] hover:border-[#E7B83F] shadow-spatial-sm hover:shadow-[0_16px_36px_rgba(231,184,63,0.18)] transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
+                className="group flex flex-col justify-between rounded-3xl bg-white border border-[#F0E8D4] hover:border-[#E7B83F] shadow-spatial-sm hover:shadow-[0_16px_36px_rgba(231,184,63,0.18)] transition-all duration-300 overflow-hidden transform hover:-translate-y-1 h-full"
               >
                 {/* Event Photo / Thumbnail */}
                 <div className="relative w-full h-52 sm:h-56 bg-[#FFF9E8] overflow-hidden border-b border-[#F0E8D4]/60">

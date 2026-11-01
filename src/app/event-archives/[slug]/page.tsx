@@ -107,28 +107,30 @@ export default function EventArchiveDetailPage({ params }: PageProps) {
         </div>
 
         {/* Resource Person & Coordinators Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* Resource Person Section (Only if provided) */}
           {archive.resource_person ? (
-            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4">
-              <div className="flex items-center gap-2.5 text-xs font-black uppercase tracking-wider text-[#C99A27]">
-                <User className="w-4 h-4 text-[#C99A27]" />
-                <span>Resource Person</span>
-              </div>
-              
-              <div className="space-y-2">
-                <h2 className="text-lg font-black text-[#252525] whitespace-pre-line leading-relaxed">
-                  {archive.resource_person_name || archive.resource_person}
-                </h2>
-                {archive.resource_person_designation && (
-                  <p className="text-xs sm:text-sm text-[#77736A] whitespace-pre-line leading-relaxed">
-                    {archive.resource_person_designation}
-                  </p>
-                )}
+            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4 h-full flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2.5 text-xs font-black uppercase tracking-wider text-[#C99A27] mb-3">
+                  <User className="w-4 h-4 text-[#C99A27]" />
+                  <span>Resource Person</span>
+                </div>
+                
+                <div className="space-y-2">
+                  <h2 className="text-lg font-black text-[#252525] whitespace-pre-line leading-relaxed">
+                    {archive.resource_person_name || archive.resource_person}
+                  </h2>
+                  {archive.resource_person_designation && (
+                    <p className="text-xs sm:text-sm text-[#77736A] whitespace-pre-line leading-relaxed">
+                      {archive.resource_person_designation}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-6 sm:p-8 flex items-center justify-center text-center">
+            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-6 sm:p-8 flex items-center justify-center text-center h-full">
               <p className="text-xs text-[#77736A] italic">
                 Resource Person details not recorded in authoritative source document.
               </p>
@@ -137,26 +139,28 @@ export default function EventArchiveDetailPage({ params }: PageProps) {
 
           {/* Event Coordinators Section (Only if provided) */}
           {archive.event_coordinators ? (
-            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4">
-              <div className="flex items-center gap-2.5 text-xs font-black uppercase tracking-wider text-[#C99A27]">
-                <Users className="w-4 h-4 text-[#C99A27]" />
-                <span>Event Coordinators</span>
+            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4 h-full flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2.5 text-xs font-black uppercase tracking-wider text-[#C99A27] mb-3">
+                  <Users className="w-4 h-4 text-[#C99A27]" />
+                  <span>Event Coordinators</span>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-sm sm:text-base font-bold text-[#252525] whitespace-pre-line leading-relaxed">
+                    {archive.event_coordinators}
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <p className="text-sm sm:text-base font-bold text-[#252525] whitespace-pre-line leading-relaxed">
-                  {archive.event_coordinators}
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-[#F0E8D4]/60">
+              <div className="pt-3 border-t border-[#F0E8D4]/60 mt-auto">
                 <span className="text-[11px] text-[#77736A]">
                   Faculty & Staff Coordinators, Department of AIML, HiCET
                 </span>
               </div>
             </div>
           ) : (
-            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-6 sm:p-8 flex items-center justify-center text-center">
+            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-6 sm:p-8 flex items-center justify-center text-center h-full">
               <p className="text-xs text-[#77736A] italic">
                 Coordinators not recorded in source document.
               </p>
@@ -165,34 +169,36 @@ export default function EventArchiveDetailPage({ params }: PageProps) {
         </div>
 
         {/* Photographic Evidence & Geo-Tag Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* Section 6: Event Photograph (Only if available) */}
           {archive.photo_url ? (
-            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#252525]">
-                  <Camera className="w-4 h-4 text-[#C99A27]" />
-                  <span>Event Photograph / Official Poster</span>
+            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4 h-full flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#252525]">
+                    <Camera className="w-4 h-4 text-[#C99A27]" />
+                    <span>Event Photograph / Official Poster</span>
+                  </div>
+                  <span className="text-[11px] text-[#77736A]">Archived Asset</span>
                 </div>
-                <span className="text-[11px] text-[#77736A]">Archived Asset</span>
-              </div>
 
-              <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shadow-xs">
-                <Image
-                  src={archive.photo_url}
-                  alt={archive.event_name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain p-2"
-                  priority
-                />
+                <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shadow-xs">
+                  <Image
+                    src={archive.photo_url}
+                    alt={archive.event_name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-contain p-2"
+                    priority
+                  />
+                </div>
               </div>
-              <p className="text-[11px] text-[#77736A] text-center">
+              <p className="text-[11px] text-[#77736A] text-center pt-2">
                 Original event poster / promotional banner as documented in departmental records.
               </p>
             </div>
           ) : (
-            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-8 flex flex-col items-center justify-center text-center min-h-[300px]">
+            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-8 flex flex-col items-center justify-center text-center min-h-[300px] h-full">
               <Camera className="w-10 h-10 text-[#C99A27]/40 mb-3" />
               <p className="text-xs font-bold text-[#252525]">No Event Photograph Available</p>
               <p className="text-[11px] text-[#77736A] mt-1 max-w-xs">
@@ -203,33 +209,35 @@ export default function EventArchiveDetailPage({ params }: PageProps) {
 
           {/* Section 7: Geo Tag Evidence (Only if available) */}
           {archive.geo_tag ? (
-            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#059669]">
-                  <MapPin className="w-4 h-4 text-[#059669]" />
-                  <span>GPS Geo-Tagged Field Proof</span>
+            <div className="rounded-3xl bg-white border border-[#F0E8D4] p-6 sm:p-8 shadow-spatial-sm space-y-4 h-full flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#059669]">
+                    <MapPin className="w-4 h-4 text-[#059669]" />
+                    <span>GPS Geo-Tagged Field Proof</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#059669] bg-[#10b981]/10 px-2.5 py-0.5 rounded-full">
+                    GPS Verified
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold text-[#059669] bg-[#10b981]/10 px-2.5 py-0.5 rounded-full">
-                  GPS Verified
-                </span>
-              </div>
 
-              <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shadow-xs">
-                <Image
-                  src={archive.geo_tag}
-                  alt={`GPS Geo-Tag: ${archive.event_name}`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain p-2"
-                  priority
-                />
+                <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shadow-xs">
+                  <Image
+                    src={archive.geo_tag}
+                    alt={`GPS Geo-Tag: ${archive.event_name}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-contain p-2"
+                    priority
+                  />
+                </div>
               </div>
-              <p className="text-[11px] text-[#77736A] text-center">
+              <p className="text-[11px] text-[#77736A] text-center pt-2">
                 Field documentation captured with GPS coordinates, timestamp, and venue location.
               </p>
             </div>
           ) : (
-            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-8 flex flex-col items-center justify-center text-center min-h-[300px]">
+            <div className="rounded-3xl bg-[#FFFDF5] border border-dashed border-[#F0E8D4] p-8 flex flex-col items-center justify-center text-center min-h-[300px] h-full">
               <MapPin className="w-10 h-10 text-[#C99A27]/40 mb-3" />
               <p className="text-xs font-bold text-[#252525]">No Geo-Tag Evidence Recorded</p>
               <p className="text-[11px] text-[#77736A] mt-1 max-w-xs">
