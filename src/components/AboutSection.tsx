@@ -128,8 +128,7 @@ export default function AboutSection() {
               <span className="font-bold text-[#252525]">Department of Artificial Intelligence and Machine Learning (AIML)</span>
             </div>
             <div className="px-4 py-2.5 rounded-2xl bg-[#FFF0B3]/50 border border-[#FFE99A] text-[#252525] w-full sm:w-auto text-center sm:text-left shadow-xs">
-              <span className="text-[#77736A] font-medium mr-1.5">Developed by:</span>
-              <span className="font-black text-[#C99A27]">Vignesh S — AIML</span>
+              <span className="font-black text-[#C99A27]">Website Developed and managed by Vignesh S - AIML</span>
             </div>
           </div>
         </div>

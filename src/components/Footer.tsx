@@ -61,8 +61,7 @@ export default function Footer() {
           <span>Department of Artificial Intelligence and Machine Learning (AIML)</span>
         </div>
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF9E8] border border-[#F0E8D4] text-[#252525] shadow-xs">
-          <span className="text-[#77736A] font-semibold">Developed by:</span>
-          <span className="font-bold text-[#C99A27]">Vignesh S — AIML</span>
+          <span className="font-bold text-[#C99A27]">Website Developed and managed by Vignesh S - AIML</span>
         </div>
       </div>
     </footer>

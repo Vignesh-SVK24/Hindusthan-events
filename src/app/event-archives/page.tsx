@@ -384,14 +384,10 @@ export default function EventArchivesPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 text-xs">
+          <div className="flex items-center text-xs">
             <div className="px-4 py-2 rounded-xl bg-[#FFFDF5] border border-[#F0E8D4]">
               <span className="text-[#77736A] font-semibold mr-1.5">Organized by:</span>
               <span className="font-bold text-[#252525]">Department of Artificial Intelligence and Machine Learning (AIML)</span>
-            </div>
-            <div className="px-4 py-2 rounded-xl bg-[#FFF0B3]/50 border border-[#FFE99A] text-[#252525] shadow-xs">
-              <span className="text-[#77736A] font-semibold mr-1.5">Developed by:</span>
-              <span className="font-black text-[#C99A27]">Vignesh S — AIML</span>
             </div>
           </div>
         </div>

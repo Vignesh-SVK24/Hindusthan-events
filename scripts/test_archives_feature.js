@@ -58,7 +58,7 @@ async function runTests() {
   assert(homeRes.status === 200, 'Homepage loaded with HTTP 200 OK');
   assert(homeRes.data.includes('AIML Event Archives'), 'Navbar contains "AIML Event Archives"');
   assert(homeRes.data.includes('Department of Artificial Intelligence and Machine Learning (AIML)'), 'Homepage includes "Department of Artificial Intelligence and Machine Learning (AIML)" attribution');
-  assert(homeRes.data.includes('Vignesh S — AIML'), 'Homepage includes "Vignesh S — AIML" developer credit');
+  assert(homeRes.data.includes('Website Developed and managed by Vignesh S - AIML'), 'Homepage includes "Website Developed and managed by Vignesh S - AIML" developer credit');
 
   // TEST 2: Dedicated Archives Page
   const archRes = await fetchUrl('/event-archives');

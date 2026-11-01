@@ -48,7 +48,7 @@ A modern full-stack web application developed for **Hindusthan College of Engine
 ## 🏛️ Departmental Initiative & Attribution
 
 - **Organized by:** Department of Artificial Intelligence and Machine Learning (AIML)
-- **Developed by:** Vignesh S — AIML
+- **Website Developed and managed by Vignesh S - AIML**
 
 ---
 
