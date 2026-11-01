@@ -64,14 +64,14 @@ export default function AdminLoginPage() {
           
           {/* Official Emblem & Branding */}
           <div className="text-center space-y-3">
-            <div className="relative w-16 h-20 mx-auto rounded-2xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm">
+            <div className="relative w-20 h-20 mx-auto rounded-2xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm">
               <Image
                 src="/college-logo.jpg"
                 alt="Hindusthan Educational and Charitable Trust"
                 fill
                 priority
                 className="object-contain p-0.5"
-                sizes="64px"
+                sizes="80px"
               />
             </div>
 
