@@ -13,7 +13,7 @@ export default function AboutSection() {
           
           {/* Institutional Trust Logo & Legacy Floating Spatial Panel */}
           <div className="lg:col-span-5 flex flex-col items-center text-center p-6 sm:p-8 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial-lg">
-            <div className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-3xl overflow-hidden bg-white p-3 border-2 border-[#FFE99A] shadow-md mb-6">
+            <div className="relative w-40 h-52 sm:w-48 sm:h-60 rounded-2xl overflow-hidden bg-white p-3 border-2 border-[#FFE99A] shadow-md mb-6">
               <Image
                 src="/college-logo.jpg"
                 alt="Hindusthan Educational and Charitable Trust"

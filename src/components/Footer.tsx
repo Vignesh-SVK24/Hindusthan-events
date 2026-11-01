@@ -12,13 +12,13 @@ export default function Footer() {
         
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm shrink-0">
+          <div className="relative w-9 h-11 rounded-lg overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm">
             <Image
               src="/college-logo.jpg"
               alt="Hindusthan Logo"
               fill
               className="object-contain"
-              sizes="40px"
+              sizes="36px"
             />
           </div>
           <div>

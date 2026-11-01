@@ -393,8 +393,8 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto rounded-full bg-white/95 backdrop-blur-xl border border-[#F0E8D4] shadow-spatial-sm px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2.5 text-[#252525] group">
-              <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-white p-0.5 border border-[#F0E8D4]">
-                <Image src="/college-logo.jpg" alt="Logo" fill className="object-contain" sizes="36px" />
+              <div className="relative w-8 h-10 rounded bg-white p-0.5 border border-[#F0E8D4]">
+                <Image src="/college-logo.jpg" alt="Logo" fill className="object-contain" sizes="32px" />
               </div>
               <span className="font-black text-sm hidden sm:inline text-[#252525]">
                 HINDUSTHAN CMS

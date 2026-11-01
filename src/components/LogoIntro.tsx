@@ -105,14 +105,14 @@ export default function LogoIntro({ onComplete, forceShow = false }: LogoIntroPr
             />
 
             {/* Elevated Floating Spatial Card for College Logo */}
-            <div className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-72 md:h-72 rounded-3xl bg-white/95 p-4 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_10px_20px_rgba(0,0,0,0.04)] backdrop-blur-md mx-auto">
+            <div className="relative w-44 h-56 sm:w-56 sm:h-72 md:w-64 md:h-80 rounded-3xl bg-white/95 p-4 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_10px_20px_rgba(0,0,0,0.04)] backdrop-blur-md">
               <Image
                 src="/college-logo.jpg"
                 alt="Hindusthan Educational and Charitable Trust"
                 fill
                 priority
                 className="object-contain p-2"
-                sizes="(max-width: 768px) 256px, 320px"
+                sizes="(max-width: 768px) 240px, 320px"
               />
             </div>
 

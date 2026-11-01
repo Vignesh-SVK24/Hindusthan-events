@@ -29,14 +29,14 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
           
           {/* College Identity & Logo */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-            <div className="relative w-10 h-10 xs:w-11 xs:h-11 sm:w-13 sm:h-13 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0">
+            <div className="relative w-9 h-11 xs:w-10 xs:h-12 sm:w-12 sm:h-14 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0">
               <Image
                 src="/college-logo.jpg"
                 alt="Hindusthan Logo"
                 fill
                 priority
                 className="object-contain p-0.5"
-                sizes="(max-width: 640px) 44px, 52px"
+                sizes="(max-width: 640px) 40px, 48px"
               />
             </div>
             <div className="flex flex-col min-w-0 max-w-[210px] xs:max-w-[260px] sm:max-w-md md:max-w-none">
