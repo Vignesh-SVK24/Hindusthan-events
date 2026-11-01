@@ -147,7 +147,7 @@ export default function EventArchivesPage() {
       </header>
 
       {/* Main Content Area: Search & Filters + Archive Grid */}
-      <section className="flex-1 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
+      <section className="flex-1 pb-20 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-6 sm:space-y-8">
         
         {/* Filter Controls (Spatial Pill Card) */}
         <div className="rounded-3xl bg-white border border-[#F0E8D4] p-5 sm:p-6 shadow-spatial-sm space-y-4">
@@ -258,20 +258,20 @@ export default function EventArchivesPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
             {filteredArchives.map((archive) => (
               <article
                 key={archive.id}
-                className="group flex flex-col justify-between rounded-3xl bg-white border border-[#F0E8D4] hover:border-[#E7B83F] shadow-spatial-sm hover:shadow-[0_16px_36px_rgba(231,184,63,0.18)] transition-all duration-300 overflow-hidden transform hover:-translate-y-1 h-full"
+                className="group flex flex-col justify-between rounded-2xl sm:rounded-3xl bg-white border border-[#F0E8D4] hover:border-[#E7B83F] shadow-spatial-sm hover:shadow-[0_16px_36px_rgba(231,184,63,0.18)] transition-all duration-300 overflow-hidden transform hover:-translate-y-1 h-full"
               >
                 {/* Event Photo / Thumbnail */}
-                <div className="relative w-full h-52 sm:h-56 bg-[#FFF9E8] overflow-hidden border-b border-[#F0E8D4]/60">
+                <div className="relative w-full h-36 xs:h-44 sm:h-56 bg-[#FFF9E8] overflow-hidden border-b border-[#F0E8D4]/60">
                   {archive.photo_url ? (
                     <Image
                       src={archive.photo_url}
                       alt={archive.event_name}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      sizes="(max-width: 768px) 50vw, 33vw"
                       className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : archive.geo_tag ? (
@@ -279,55 +279,55 @@ export default function EventArchivesPage() {
                       src={archive.geo_tag}
                       alt={archive.event_name}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      sizes="(max-width: 768px) 50vw, 33vw"
                       className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-[#77736A] p-4 text-center">
-                      <Camera className="w-10 h-10 text-[#C99A27]/50 mb-2" />
-                      <span className="text-xs font-bold text-[#252525]">Official Department Event</span>
-                      <span className="text-[10px] text-[#77736A]">Photographic Record Archived in Department</span>
+                    <div className="w-full h-full flex flex-col items-center justify-center text-[#77736A] p-3 text-center">
+                      <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-[#C99A27]/50 mb-1.5" />
+                      <span className="text-[11px] sm:text-xs font-bold text-[#252525]">Official Event</span>
+                      <span className="text-[9px] sm:text-[10px] text-[#77736A] hidden xs:inline">Archived in Department</span>
                     </div>
                   )}
 
                   {/* S.No Badge (Preserves original serial number) */}
-                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#F0E8D4] text-[11px] font-black text-[#252525] shadow-sm">
+                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#F0E8D4] text-[9px] xs:text-[10px] sm:text-[11px] font-black text-[#252525] shadow-sm">
                     S.No. {archive.original_serial_number}
                   </div>
 
                   {/* Geo-Tag badge if available */}
                   {archive.geo_tag && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#10b981]/15 text-[#059669] border border-[#10b981]/30 backdrop-blur-md text-[10px] font-black shadow-sm">
-                      <CheckCircle2 className="w-3 h-3" />
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#10b981]/15 text-[#059669] border border-[#10b981]/30 backdrop-blur-md text-[8.5px] xs:text-[9.5px] sm:text-[10px] font-black shadow-sm">
+                      <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                       <span>Geo-Tagged</span>
                     </div>
                   )}
                 </div>
 
                 {/* Card Body */}
-                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-3">
+                <div className="p-3.5 sm:p-5 md:p-6 flex-1 flex flex-col justify-between space-y-3 sm:space-y-4">
+                  <div className="space-y-2 sm:space-y-3">
                     {/* Event Date (Original format strictly preserved) */}
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#C99A27]">
-                      <Calendar className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-[#C99A27]">
+                      <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                       <span>{archive.event_date_original}</span>
                     </div>
 
                     {/* Event Title (Exact original text) */}
-                    <h3 className="text-base font-black text-[#252525] group-hover:text-[#C99A27] transition-colors leading-snug font-sans line-clamp-3">
+                    <h3 className="text-xs xs:text-sm sm:text-base font-black text-[#252525] group-hover:text-[#C99A27] transition-colors leading-snug font-sans line-clamp-3">
                       {archive.event_name}
                     </h3>
 
                     {/* Resource Person (if provided) */}
                     {archive.resource_person && (
-                      <div className="p-3 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-xs">
-                        <div className="flex items-start gap-2">
-                          <User className="w-3.5 h-3.5 text-[#C99A27] shrink-0 mt-0.5" />
+                      <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] text-[10px] sm:text-xs">
+                        <div className="flex items-start gap-1.5 sm:gap-2">
+                          <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#C99A27] shrink-0 mt-0.5" />
                           <div className="min-w-0">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#77736A] block">
+                            <span className="text-[8.5px] sm:text-[10px] font-bold uppercase tracking-wider text-[#77736A] block">
                               Resource Person
                             </span>
-                            <p className="font-bold text-[#252525] whitespace-pre-line leading-relaxed">
+                            <p className="font-bold text-[#252525] whitespace-pre-line leading-relaxed line-clamp-2 sm:line-clamp-none">
                               {archive.resource_person}
                             </p>
                           </div>
@@ -337,14 +337,14 @@ export default function EventArchivesPage() {
 
                     {/* Event Coordinators */}
                     {archive.event_coordinators && (
-                      <div className="p-3 rounded-2xl bg-[#FFF9E8]/40 border border-[#F0E8D4] text-xs">
-                        <div className="flex items-start gap-2">
-                          <Users className="w-3.5 h-3.5 text-[#C99A27] shrink-0 mt-0.5" />
+                      <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-[#FFF9E8]/40 border border-[#F0E8D4] text-[10px] sm:text-xs">
+                        <div className="flex items-start gap-1.5 sm:gap-2">
+                          <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#C99A27] shrink-0 mt-0.5" />
                           <div className="min-w-0">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#77736A] block">
+                            <span className="text-[8.5px] sm:text-[10px] font-bold uppercase tracking-wider text-[#77736A] block">
                               Event Coordinators
                             </span>
-                            <p className="font-semibold text-[#252525] whitespace-pre-line leading-relaxed">
+                            <p className="font-semibold text-[#252525] whitespace-pre-line leading-relaxed line-clamp-2 sm:line-clamp-none">
                               {archive.event_coordinators}
                             </p>
                           </div>
@@ -354,13 +354,13 @@ export default function EventArchivesPage() {
                   </div>
 
                   {/* Card Action Link */}
-                  <div className="pt-3 border-t border-[#F0E8D4]/60">
+                  <div className="pt-2.5 sm:pt-3 border-t border-[#F0E8D4]/60">
                     <Link
                       href={`/event-archives/${archive.slug}`}
-                      className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#FFFDF5] group-hover:bg-[#FFE99A] border border-[#F0E8D4] text-xs font-black text-[#252525] transition-all shadow-xs"
+                      className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#FFFDF5] group-hover:bg-[#FFE99A] border border-[#F0E8D4] text-[10px] xs:text-xs font-black text-[#252525] transition-all shadow-xs"
                     >
-                      <span>View Historical Record</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      <span className="truncate">View <span className="hidden xs:inline">Historical </span>Record</span>
+                      <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 group-hover:translate-x-1 transition-transform shrink-0" />
                     </Link>
                   </div>
                 </div>
