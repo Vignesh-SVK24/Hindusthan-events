@@ -171,11 +171,11 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
 
       </div>
 
-      {/* Events Rectangular Grid */}
+      {/* Events Rectangular Grid (2 events per row) */}
       {filteredEvents.length > 0 ? (
         <motion.div 
           layout
-          className="grid grid-cols-1 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8"
         >
           <AnimatePresence>
             {filteredEvents.map((event) => (
@@ -186,6 +186,7 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.25 }}
+                className="h-full flex flex-col"
               >
                 <EventCard event={event} />
               </motion.div>
