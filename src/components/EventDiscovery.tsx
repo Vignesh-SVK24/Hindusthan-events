@@ -60,7 +60,7 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
   }, [initialEvents, selectedCategory, searchQuery, statusFilter, sortBy]);
 
   return (
-    <section id="events-discovery" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <section id="events-discovery" className="py-10 sm:py-16 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
       
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
@@ -173,11 +173,11 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
 
       </div>
 
-      {/* Events Rectangular Grid (2 events per row) */}
+      {/* Events Rectangular Grid (2 events per row across all screens) */}
       {filteredEvents.length > 0 ? (
         <motion.div 
           layout
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8"
+          className="grid grid-cols-2 gap-3 sm:gap-6 lg:gap-8"
         >
           <AnimatePresence>
             {filteredEvents.map((event) => (
