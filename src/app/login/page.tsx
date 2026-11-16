@@ -63,18 +63,42 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#FFFDF5] text-[#252525] selection:bg-[#FFE99A] selection:text-[#252525] flex flex-col justify-between relative overflow-x-hidden">
+    <main className="min-h-screen w-full text-[#252525] selection:bg-[#FFE99A] selection:text-[#252525] flex flex-col justify-between relative overflow-x-hidden">
       
-      {/* Background Layer: Delicate Golden Glows & Spatial Depth Elements */}
+      {/* ========================================================= */}
+      {/* FULL-SCREEN BACKGROUND: HICET CAMPUS FRONT VIEW           */}
+      {/* With Natural Cover Sizing, Center Positioning & Overlay   */}
+      {/* ========================================================= */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Soft Golden Ambient Orbs */}
-        <div className="absolute -top-32 -left-32 w-96 sm:w-[520px] h-96 sm:h-[520px] bg-gradient-to-br from-[#FFE99A]/40 via-[#FFF9E8]/30 to-transparent rounded-full blur-3xl opacity-70" />
-        <div className="absolute top-1/3 right-0 w-80 sm:w-[460px] h-80 sm:h-[460px] bg-gradient-to-bl from-[#FFE99A]/30 via-[#FFF0B3]/20 to-transparent rounded-full blur-3xl opacity-60" />
-        <div className="absolute -bottom-24 left-1/4 w-96 h-96 bg-gradient-to-tr from-[#FFF0B3]/35 to-transparent rounded-full blur-3xl opacity-50" />
+        
+        {/* Full-screen HICET Campus Front-view Photograph */}
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src="/hicet-campus.jpg"
+            alt="Hindusthan College of Engineering and Technology Campus Front View"
+            fill
+            priority
+            quality={92}
+            className="object-cover object-center transform scale-[1.01]"
+            sizes="100vw"
+          />
+        </div>
 
-        {/* Subtle Decorative Geometric Grid Pattern */}
+        {/* Soft Warm-Yellow, Cream & White Gradient Overlay */}
+        {/* Tuned to preserve campus visibility while guaranteeing contrast & brand harmony */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#FFFDF5]/90 via-[#FFF9E8]/80 to-[#FFFDF5]/85 backdrop-blur-[1.5px]" />
+        
+        {/* Secondary Directional Tint to highlight the login card on the right */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FFF9E8]/30 to-[#FFFDF5]/60 hidden lg:block" />
+
+        {/* Soft Golden Ambient Orbs for Spatial Depth */}
+        <div className="absolute -top-32 -left-32 w-96 sm:w-[540px] h-96 sm:h-[540px] bg-gradient-to-br from-[#FFE99A]/30 via-[#FFF9E8]/20 to-transparent rounded-full blur-3xl opacity-60" />
+        <div className="absolute top-1/3 right-0 w-80 sm:w-[480px] h-80 sm:h-[480px] bg-gradient-to-bl from-[#FFE99A]/25 via-[#FFF0B3]/15 to-transparent rounded-full blur-3xl opacity-50" />
+        <div className="absolute -bottom-24 left-1/4 w-96 h-96 bg-gradient-to-tr from-[#FFF0B3]/25 to-transparent rounded-full blur-3xl opacity-40" />
+
+        {/* Subtle Spatial Dot Texture */}
         <div 
-          className="absolute inset-0 opacity-[0.035]"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: 'radial-gradient(#E7B83F 1px, transparent 1px)',
             backgroundSize: '24px 24px',
@@ -82,48 +106,48 @@ export default function AdminLoginPage() {
         />
       </div>
 
-      {/* Main Split-Screen Container */}
+      {/* Main Split-Screen Content Layer */}
       <div className="relative z-10 w-full flex-1 flex flex-col lg:flex-row items-stretch">
         
         {/* ========================================================= */}
         {/* LEFT HERO SECTION (~55% width on desktop)                */}
         {/* ========================================================= */}
-        <section className="w-full lg:w-[55%] xl:w-[56%] flex flex-col justify-between p-5 sm:p-8 md:p-10 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-[#F0E8D4]/80">
+        <section className="w-full lg:w-[55%] xl:w-[56%] flex flex-col justify-between p-5 sm:p-8 md:p-10 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-[#F0E8D4]/60">
           
           {/* Top Bar: Navigation Link & Campus Badge */}
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="flex items-center justify-between gap-4 mb-8 sm:mb-12"
+            className="flex items-center justify-between gap-4 mb-6 sm:mb-10"
           >
             {/* Back to Website Link */}
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/90 hover:bg-[#FFE99A] border border-[#F0E8D4] text-xs font-bold text-[#252525] transition-all shadow-xs group"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/95 hover:bg-[#FFE99A] border border-[#F0E8D4] text-xs font-bold text-[#252525] transition-all shadow-xs group backdrop-blur-md"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
               <span>Back to Website</span>
             </Link>
 
             {/* Small Label: HICET | CAMPUS EVENTS */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#FFF9E8] border border-[#E7B83F]/30 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#C99A27] shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/95 border border-[#E7B83F]/35 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#C99A27] shadow-xs backdrop-blur-md">
               <Sparkles className="w-3 h-3 text-[#E7B83F]" />
               <span>HICET | CAMPUS EVENTS</span>
             </div>
           </motion.div>
 
           {/* Core Brand & Inspiring Hero Headline */}
-          <div className="space-y-6 sm:space-y-8 max-w-2xl my-auto py-4">
+          <div className="space-y-6 sm:space-y-8 max-w-2xl my-auto py-2 sm:py-4">
             
-            {/* College Logo & Institution Name */}
+            {/* College Logo & Institution Name in Frosted Spatial Container */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-              className="flex items-center gap-3.5"
+              className="inline-flex items-center gap-3.5 p-2 sm:p-2.5 pr-4 sm:pr-5 rounded-2xl bg-white/90 backdrop-blur-md border border-[#F0E8D4] shadow-xs"
             >
-              <div className="relative w-12 h-14 sm:w-14 sm:h-16 rounded-2xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-spatial-sm shrink-0">
+              <div className="relative w-11 h-13 sm:w-13 sm:h-15 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-xs shrink-0">
                 <Image
                   src="/college-logo.jpg"
                   alt="Hindusthan College of Engineering and Technology"
@@ -150,27 +174,27 @@ export default function AdminLoginPage() {
               transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
               className="space-y-3 sm:space-y-4"
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[42px] xl:text-5xl font-black text-[#252525] tracking-tight leading-[1.15] font-sans">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[42px] xl:text-5xl font-black text-[#252525] tracking-tight leading-[1.15] font-sans drop-shadow-xs">
                 Every Event Begins With an{' '}
                 <span className="relative inline-block text-[#C99A27]">
                   Experience.
                   <span className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[#FFE99A] -z-10 rounded-full" />
                 </span>
               </h1>
-              <p className="text-sm sm:text-base text-[#77736A] leading-relaxed max-w-xl font-normal">
+              <p className="text-sm sm:text-base text-[#4A4740] font-medium leading-relaxed max-w-xl">
                 Discover, organize and manage exciting campus events, celebrations and technical experiences at Hindusthan College of Engineering and Technology.
               </p>
             </motion.div>
 
-            {/* Subtle Decorative Campus Event Elements (Abstract Ticket & Calendar Motifs) */}
+            {/* Decorative Campus Event Elements (Abstract Ticket & Calendar Motifs) */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
-              className="pt-2 sm:pt-4"
+              className="pt-1 sm:pt-3"
             >
               {/* Abstract Spatial Event-Ticket Motif */}
-              <div className="relative rounded-3xl bg-white/80 backdrop-blur-md border border-[#F0E8D4] p-4 sm:p-5 shadow-[0_12px_32px_rgba(231,184,63,0.08)] overflow-hidden">
+              <div className="relative rounded-3xl bg-white/90 backdrop-blur-md border border-[#F0E8D4] p-4 sm:p-5 shadow-[0_12px_32px_rgba(231,184,63,0.08)] overflow-hidden">
                 
                 {/* Decorative Perforated Notch Details */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-[#FFFDF5] border border-[#F0E8D4]" />
@@ -225,7 +249,7 @@ export default function AdminLoginPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="pt-6 sm:pt-8 text-xs text-[#77736A] flex flex-wrap items-center justify-between gap-2 border-t border-[#F0E8D4]/60"
+            className="pt-5 sm:pt-6 text-xs text-[#5C5850] flex flex-wrap items-center justify-between gap-2 border-t border-[#F0E8D4]/60"
           >
             <span>Department of Artificial Intelligence and Machine Learning (AIML)</span>
             <span className="font-semibold text-[#252525]">Coimbatore, Tamil Nadu</span>
@@ -245,8 +269,8 @@ export default function AdminLoginPage() {
             className="w-full max-w-md"
           >
             
-            {/* Floating Spatial Login Card */}
-            <div className="bg-white rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.14),0_8px_20px_rgba(0,0,0,0.03)] space-y-6">
+            {/* Floating Spatial Login Card with Frosted Depth */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.14),0_8px_20px_rgba(0,0,0,0.04)] space-y-6">
               
               {/* Card Header: Welcome Back */}
               <div className="space-y-2">
