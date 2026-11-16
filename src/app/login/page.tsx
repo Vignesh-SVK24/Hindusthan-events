@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
       
       {/* ========================================================= */}
       {/* FULL-SCREEN BACKGROUND: HICET CAMPUS FRONT VIEW           */}
-      {/* With Natural Cover Sizing, Center Positioning & Overlay   */}
+      {/* Minimal Gradient Level for Maximum Campus Photo Clarity   */}
       {/* ========================================================= */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         
@@ -78,32 +78,16 @@ export default function AdminLoginPage() {
             alt="Hindusthan College of Engineering and Technology Campus Front View"
             fill
             priority
-            quality={92}
-            className="object-cover object-center transform scale-[1.01]"
+            quality={95}
+            className="object-cover object-center"
             sizes="100vw"
           />
         </div>
 
-        {/* Soft Warm-Yellow, Cream & White Gradient Overlay */}
-        {/* Tuned to preserve campus visibility while guaranteeing contrast & brand harmony */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#FFFDF5]/90 via-[#FFF9E8]/80 to-[#FFFDF5]/85 backdrop-blur-[1.5px]" />
-        
-        {/* Secondary Directional Tint to highlight the login card on the right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FFF9E8]/30 to-[#FFFDF5]/60 hidden lg:block" />
-
-        {/* Soft Golden Ambient Orbs for Spatial Depth */}
-        <div className="absolute -top-32 -left-32 w-96 sm:w-[540px] h-96 sm:h-[540px] bg-gradient-to-br from-[#FFE99A]/30 via-[#FFF9E8]/20 to-transparent rounded-full blur-3xl opacity-60" />
-        <div className="absolute top-1/3 right-0 w-80 sm:w-[480px] h-80 sm:h-[480px] bg-gradient-to-bl from-[#FFE99A]/25 via-[#FFF0B3]/15 to-transparent rounded-full blur-3xl opacity-50" />
-        <div className="absolute -bottom-24 left-1/4 w-96 h-96 bg-gradient-to-tr from-[#FFF0B3]/25 to-transparent rounded-full blur-3xl opacity-40" />
-
-        {/* Subtle Spatial Dot Texture */}
-        <div 
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: 'radial-gradient(#E7B83F 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
+        {/* Minimal Subtle Warm-Yellow & Cream Gradient Tint */}
+        {/* Reduced to minimum level to preserve the vivid, natural campus colors & architecture */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FFFDF5]/25 via-transparent to-[#FFFDF5]/30" />
+        <div className="absolute inset-0 bg-[#FFFDF5]/15" />
       </div>
 
       {/* Main Split-Screen Content Layer */}
@@ -112,147 +96,140 @@ export default function AdminLoginPage() {
         {/* ========================================================= */}
         {/* LEFT HERO SECTION (~55% width on desktop)                */}
         {/* ========================================================= */}
-        <section className="w-full lg:w-[55%] xl:w-[56%] flex flex-col justify-between p-5 sm:p-8 md:p-10 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-[#F0E8D4]/60">
+        <section className="w-full lg:w-[55%] xl:w-[56%] flex flex-col justify-between p-4 sm:p-8 md:p-10 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-[#F0E8D4]/40">
           
           {/* Top Bar: Navigation Link & Campus Badge */}
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="flex items-center justify-between gap-4 mb-6 sm:mb-10"
+            className="flex items-center justify-between gap-4 mb-6 sm:mb-8"
           >
             {/* Back to Website Link */}
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/95 hover:bg-[#FFE99A] border border-[#F0E8D4] text-xs font-bold text-[#252525] transition-all shadow-xs group backdrop-blur-md"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/95 hover:bg-[#FFE99A] border border-[#F0E8D4] text-xs font-bold text-[#252525] transition-all shadow-spatial-sm group backdrop-blur-md"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
               <span>Back to Website</span>
             </Link>
 
             {/* Small Label: HICET | CAMPUS EVENTS */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/95 border border-[#E7B83F]/35 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#C99A27] shadow-xs backdrop-blur-md">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/95 border border-[#E7B83F]/40 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#C99A27] shadow-spatial-sm backdrop-blur-md">
               <Sparkles className="w-3 h-3 text-[#E7B83F]" />
               <span>HICET | CAMPUS EVENTS</span>
             </div>
           </motion.div>
 
-          {/* Core Brand & Inspiring Hero Headline */}
-          <div className="space-y-6 sm:space-y-8 max-w-2xl my-auto py-2 sm:py-4">
-            
-            {/* College Logo & Institution Name in Frosted Spatial Container */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-              className="inline-flex items-center gap-3.5 p-2 sm:p-2.5 pr-4 sm:pr-5 rounded-2xl bg-white/90 backdrop-blur-md border border-[#F0E8D4] shadow-xs"
-            >
-              <div className="relative w-11 h-13 sm:w-13 sm:h-15 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-xs shrink-0">
-                <Image
-                  src="/college-logo.jpg"
-                  alt="Hindusthan College of Engineering and Technology"
-                  fill
-                  priority
-                  className="object-contain p-0.5"
-                  sizes="64px"
-                />
-              </div>
-              <div className="min-w-0">
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#C99A27] block">
-                  Hindusthan Educational & Charitable Trust
-                </span>
-                <h2 className="text-xs sm:text-sm md:text-base font-black text-[#252525] uppercase tracking-tight leading-tight">
-                  Hindusthan College of Engineering and Technology
-                </h2>
-              </div>
-            </motion.div>
-
-            {/* Main Headline & Supporting Text */}
+          {/* Frosted Spatial Hero Card for Maximum Text Readability */}
+          <div className="my-auto py-2 sm:py-4 max-w-2xl">
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-              className="space-y-3 sm:space-y-4"
+              transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
+              className="rounded-3xl p-5 sm:p-8 bg-white/88 backdrop-blur-md border border-[#F0E8D4] shadow-[0_16px_40px_rgba(231,184,63,0.12),0_4px_16px_rgba(0,0,0,0.04)] space-y-6 sm:space-y-7"
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[42px] xl:text-5xl font-black text-[#252525] tracking-tight leading-[1.15] font-sans drop-shadow-xs">
-                Every Event Begins With an{' '}
-                <span className="relative inline-block text-[#C99A27]">
-                  Experience.
-                  <span className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[#FFE99A] -z-10 rounded-full" />
-                </span>
-              </h1>
-              <p className="text-sm sm:text-base text-[#4A4740] font-medium leading-relaxed max-w-xl">
-                Discover, organize and manage exciting campus events, celebrations and technical experiences at Hindusthan College of Engineering and Technology.
-              </p>
-            </motion.div>
+              
+              {/* College Logo & Institution Name */}
+              <div className="flex items-center gap-3.5">
+                <div className="relative w-11 h-13 sm:w-13 sm:h-15 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-xs shrink-0">
+                  <Image
+                    src="/college-logo.jpg"
+                    alt="Hindusthan College of Engineering and Technology"
+                    fill
+                    priority
+                    className="object-contain p-0.5"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#C99A27] block">
+                    Hindusthan Educational & Charitable Trust
+                  </span>
+                  <h2 className="text-xs sm:text-sm md:text-base font-black text-[#252525] uppercase tracking-tight leading-tight">
+                    Hindusthan College of Engineering and Technology
+                  </h2>
+                </div>
+              </div>
 
-            {/* Decorative Campus Event Elements (Abstract Ticket & Calendar Motifs) */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
-              className="pt-1 sm:pt-3"
-            >
+              {/* Main Headline & Supporting Text */}
+              <div className="space-y-3">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[38px] xl:text-4xl font-black text-[#252525] tracking-tight leading-[1.18] font-sans">
+                  Every Event Begins With an{' '}
+                  <span className="relative inline-block text-[#C99A27]">
+                    Experience.
+                    <span className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[#FFE99A] -z-10 rounded-full" />
+                  </span>
+                </h1>
+                <p className="text-xs sm:text-sm md:text-base text-[#5C5850] font-medium leading-relaxed">
+                  Discover, organize and manage exciting campus events, celebrations and technical experiences at Hindusthan College of Engineering and Technology.
+                </p>
+              </div>
+
               {/* Abstract Spatial Event-Ticket Motif */}
-              <div className="relative rounded-3xl bg-white/90 backdrop-blur-md border border-[#F0E8D4] p-4 sm:p-5 shadow-[0_12px_32px_rgba(231,184,63,0.08)] overflow-hidden">
+              <div className="relative rounded-2xl bg-[#FFFDF5]/90 border border-[#F0E8D4] p-4 shadow-xs overflow-hidden">
                 
-                {/* Decorative Perforated Notch Details */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-[#FFFDF5] border border-[#F0E8D4]" />
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-[#FFFDF5] border border-[#F0E8D4]" />
+                {/* Perforated Notch Details */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border border-[#F0E8D4]" />
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border border-[#F0E8D4]" />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-center">
                   
                   {/* Ticket Left: Feature Pillars */}
-                  <div className="space-y-2 pr-0 sm:pr-4 sm:border-r sm:border-dashed sm:border-[#F0E8D4]">
-                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#C99A27]">
-                      <Ticket className="w-4 h-4 text-[#E7B83F]" />
+                  <div className="space-y-1.5 pr-0 sm:pr-3 sm:border-r sm:border-dashed sm:border-[#F0E8D4]">
+                    <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#C99A27]">
+                      <Ticket className="w-3.5 h-3.5 text-[#E7B83F]" />
                       <span>HiCET Event Management</span>
                     </div>
-                    <p className="text-xs font-semibold text-[#252525]">
-                      Unified Portal for Tech Symposia, Hackathons, Cultural Festivals & Sports
+                    <p className="text-[11px] font-semibold text-[#252525] leading-snug">
+                      Tech Symposia, Hackathons, Cultural Festivals & Sports
                     </p>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      <span className="px-2 py-0.5 rounded-full bg-[#FFF9E8] text-[10px] font-bold text-[#77736A] border border-[#F0E8D4]">
-                        Live Registration ON/OFF
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      <span className="px-2 py-0.5 rounded-full bg-[#FFF9E8] text-[9.5px] font-bold text-[#77736A] border border-[#F0E8D4]">
+                        Registration ON/OFF
                       </span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#FFF9E8] text-[10px] font-bold text-[#77736A] border border-[#F0E8D4]">
-                        QR Pass Generation
+                      <span className="px-2 py-0.5 rounded-full bg-[#FFF9E8] text-[9.5px] font-bold text-[#77736A] border border-[#F0E8D4]">
+                        QR Pass
                       </span>
                     </div>
                   </div>
 
                   {/* Ticket Right: Academic Stats & Verification */}
-                  <div className="space-y-2 pl-0 sm:pl-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#77736A]">
-                      <Calendar className="w-4 h-4 text-[#C99A27]" />
+                  <div className="space-y-1.5 pl-0 sm:pl-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#77736A]">
+                      <Calendar className="w-3.5 h-3.5 text-[#C99A27]" />
                       <span>Academic Season 2025–2026</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span className="text-xs font-bold text-[#252525]">
-                        Department of AIML Central Repository
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="text-[11px] font-bold text-[#252525]">
+                        Dept. of AIML Central Repository
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#77736A] leading-snug">
-                      Authorized department coordinators publish events, manage attendee CSV exports & historical records.
+                    <p className="text-[10.5px] text-[#77736A] leading-snug">
+                      Authorized coordinators manage attendee CSV exports & historical records.
                     </p>
                   </div>
 
                 </div>
               </div>
-            </motion.div>
 
+            </motion.div>
           </div>
 
           {/* Left Footer: Institutional Attribution */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="pt-5 sm:pt-6 text-xs text-[#5C5850] flex flex-wrap items-center justify-between gap-2 border-t border-[#F0E8D4]/60"
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="pt-4 text-xs text-[#4A4740] flex flex-wrap items-center justify-between gap-2"
           >
-            <span>Department of Artificial Intelligence and Machine Learning (AIML)</span>
-            <span className="font-semibold text-[#252525]">Coimbatore, Tamil Nadu</span>
+            <div className="px-3.5 py-1.5 rounded-xl bg-white/80 backdrop-blur-md border border-[#F0E8D4]/80 shadow-xs">
+              <span>Department of Artificial Intelligence and Machine Learning (AIML)</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md border border-[#F0E8D4]/80 shadow-xs font-semibold text-[#252525]">
+              Coimbatore, Tamil Nadu
+            </div>
           </motion.div>
 
         </section>
@@ -269,8 +246,8 @@ export default function AdminLoginPage() {
             className="w-full max-w-md"
           >
             
-            {/* Floating Spatial Login Card with Frosted Depth */}
-            <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.14),0_8px_20px_rgba(0,0,0,0.04)] space-y-6">
+            {/* Floating Spatial Login Card with High-Clarity Frosted Depth */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_8px_24px_rgba(0,0,0,0.06)] space-y-6">
               
               {/* Card Header: Welcome Back */}
               <div className="space-y-2">
