@@ -20,7 +20,7 @@ export function getSupabaseServerClient(useServiceRole = false) {
     return null;
   }
 
-  const key = useServiceRole && supabaseServiceRoleKey ? supabaseServiceRoleKey : supabaseAnonKey;
+  const key = useServiceRole && supabaseServiceRoleKey ? supabaseServiceRoleKey : (supabaseServiceRoleKey || supabaseAnonKey);
   if (!key) {
     return null;
   }

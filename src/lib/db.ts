@@ -691,32 +691,32 @@ export function registerUserForEvent(data: {
   department: string;
   year: string;
   contact_number: string;
-}): { success: boolean; message: string; registration?: EventRegistration } {
+}): { success: boolean; message: string; error?: string; registration?: EventRegistration; alreadyRegistered?: boolean } {
   const db = getDatabase();
-  const event = db.events.find((e) => e.id === data.event_id);
+  const event = db.events.find((e) => e.id === data.event_id || e.slug === data.event_id);
   if (!event) {
-    return { success: false, message: 'Event not found.' };
+    return { success: false, message: 'Event not found.', error: 'Event not found.' };
   }
 
   // Soft delete guard
   if (event.is_deleted) {
-    return { success: false, message: 'This event is currently unavailable or removed.' };
+    return { success: false, message: 'This event is currently unavailable or removed.', error: 'This event is currently unavailable or removed.' };
   }
 
   // CORE BUSINESS RULE: Registration ON/OFF Enforcement
   if (!event.registration_enabled) {
-    return { success: false, message: 'Registration is closed or unavailable for this event.' };
+    return { success: false, message: 'Registration is closed or unavailable for this event.', error: 'Registration is closed or unavailable for this event.' };
   }
 
   if (event.publication_status !== 'published') {
-    return { success: false, message: 'Event is not currently published.' };
+    return { success: false, message: 'Event is not currently published.', error: 'Event is not currently published.' };
   }
 
   // Capacity limit enforcement
   if (event.maximum_participants && typeof event.maximum_participants === 'number' && event.maximum_participants > 0) {
-    const currentCount = db.event_registrations.filter((r) => r.event_id === event.id && r.registration_status !== 'cancelled').length;
+    const currentCount = db.event_registrations.filter((r) => (r.event_id === event.id || r.event_id === event.slug) && r.registration_status !== 'cancelled').length;
     if (currentCount >= event.maximum_participants) {
-      return { success: false, message: `Registration is full. Maximum event capacity (${event.maximum_participants} participants) has been reached.` };
+      return { success: false, message: `Registration is full. Maximum event capacity (${event.maximum_participants} participants) has been reached.`, error: `Registration is full. Maximum event capacity (${event.maximum_participants} participants) has been reached.` };
     }
   }
 
@@ -724,25 +724,30 @@ export function registerUserForEvent(data: {
   if (event.registration_deadline) {
     const deadline = new Date(event.registration_deadline);
     if (new Date() > deadline) {
-      return { success: false, message: 'The registration deadline for this event has passed.' };
+      return { success: false, message: 'The registration deadline for this event has passed.', error: 'The registration deadline for this event has passed.' };
     }
   }
 
   // Check unique constraint: user already registered for this event by email or register number
   const existing = db.event_registrations.find(
     (r) =>
-      r.event_id === data.event_id &&
+      (r.event_id === event.id || r.event_id === event.slug) &&
       (r.email.toLowerCase() === data.email.toLowerCase() ||
         (r.register_number && data.register_number && r.register_number.toLowerCase() === data.register_number.toLowerCase()))
   );
 
   if (existing) {
-    return { success: false, message: 'You are already registered for this event with this email or register number.' };
+    return {
+      success: false,
+      alreadyRegistered: true,
+      message: 'You are already registered for this event with this email or register number.',
+      error: 'You are already registered for this event with this email or register number.',
+    };
   }
 
   const newReg: EventRegistration = {
     id: `reg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-    event_id: data.event_id,
+    event_id: event.id,
     user_id: data.user_id || `guest-${Date.now()}`,
     full_name: data.full_name,
     email: data.email,

@@ -684,12 +684,16 @@ export async function registerForEvent(
         return { success: false, error: regErr.message || 'Registration failed.' };
       }
 
-      // Record in event history
-      await supabase.from('event_history').insert({
-        event_id: event.id,
-        activity_type: 'REGISTERED',
-        activity_description: `Participant "${registrationData.full_name.trim()}" registered (${regNumber}).`,
-      });
+      // Record in event history (non-blocking)
+      try {
+        await supabase.from('event_history').insert({
+          event_id: event.id,
+          activity_type: 'REGISTERED',
+          activity_description: `Participant "${registrationData.full_name.trim()}" registered (${regNumber}).`,
+        });
+      } catch (hErr) {
+        console.warn('Non-critical event history insert warning:', hErr);
+      }
 
       return {
         success: true,
@@ -715,10 +719,17 @@ export async function registerForEvent(
   }
 
   // Fallback to local DB
-  return localDb.registerUserForEvent({
+  const localResult = localDb.registerUserForEvent({
     event_id: eventSlug,
     ...registrationData,
   });
+
+  return {
+    success: localResult.success,
+    alreadyRegistered: localResult.alreadyRegistered,
+    error: localResult.error || localResult.message,
+    registration: localResult.registration,
+  };
 }
 
 // ============================================================================

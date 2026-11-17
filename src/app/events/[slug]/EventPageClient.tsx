@@ -113,7 +113,7 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || data.message || 'Registration failed');
       }
 
       setIsRegistered(true);

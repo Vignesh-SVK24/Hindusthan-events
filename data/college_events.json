@@ -530,6 +530,66 @@
       "created_by": "admin-usr-1",
       "created_at": "2026-10-20T18:44:06.411Z",
       "updated_at": "2026-10-30T18:44:06.411Z"
+    },
+    {
+      "id": "event-neronova",
+      "slug": "neronova",
+      "title": "NERONOVA 2026 — National Level AI & Robotics Symposium",
+      "tagline": "Igniting Intelligence. Engineering Tomorrow.",
+      "short_description": "National level technical symposium featuring AI project expos, autonomous robotics arena, prompt battles, and hackathons.",
+      "description": "NERONOVA 2026 is Hindusthan College of Engineering and Technology flagship national-level technical symposium.",
+      "category_id": "cat-1",
+      "department": "Department of Artificial Intelligence and Machine Learning (AIML)",
+      "organizer": "AIML Student Association & Departmental Initiative",
+      "start_date": "2026-12-15",
+      "end_date": "2026-12-16",
+      "start_time": "09:00",
+      "end_time": "17:00",
+      "venue": "APJ Abdul Kalam Auditorium & AI Research Labs",
+      "poster_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+      "cover_image_url": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80",
+      "registration_enabled": true,
+      "registration_type": "builtin",
+      "registration_url": "",
+      "registration_deadline": "2026-12-10T23:59:59+00:00",
+      "maximum_participants": 500,
+      "publication_status": "published",
+      "eligibility": "All Engineering, Technology, and Science students.",
+      "highlights": [
+        "₹50,000 Total Cash Prize Pool",
+        "RoboWars Arena",
+        "National AI Hackathon"
+      ],
+      "rules": [
+        "College ID card mandatory"
+      ],
+      "schedule": [
+        {
+          "time": "09:00 AM",
+          "title": "Inauguration"
+        }
+      ],
+      "prizes": [
+        {
+          "rank": "1st Place",
+          "title": "Champion",
+          "reward": "₹25,000"
+        }
+      ],
+      "coordinators": [
+        {
+          "name": "Faculty Convener",
+          "role": "AIML HOD",
+          "email": "aiml.hod@hindusthan.net",
+          "phone": "+91 94432 00001"
+        }
+      ],
+      "theme": {
+        "theme_preset": "tech-symposium",
+        "primary_color": "#00f0ff",
+        "is_deleted": false,
+        "event_status": "published"
+      }
     }
   ],
   "event_themes": [
