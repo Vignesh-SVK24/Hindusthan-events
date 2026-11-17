@@ -53,9 +53,10 @@ async function seed() {
   const dbData = JSON.parse(raw);
 
   // 1. Categories
-  if (dbData.categories && dbData.categories.length > 0) {
-    console.log(`📦 Migrating ${dbData.categories.length} categories...`);
-    const { error: catErr } = await supabase.from('categories').upsert(dbData.categories, { onConflict: 'id' });
+  const categoriesList = dbData.event_categories || dbData.categories || [];
+  if (categoriesList.length > 0) {
+    console.log(`📦 Migrating ${categoriesList.length} categories...`);
+    const { error: catErr } = await supabase.from('categories').upsert(categoriesList, { onConflict: 'id' });
     if (catErr) {
       console.warn('⚠️ Categories warning:', catErr.message);
     } else {
@@ -111,9 +112,10 @@ async function seed() {
   }
 
   // 3. Archives
-  if (dbData.archives && dbData.archives.length > 0) {
-    console.log(`📦 Migrating ${dbData.archives.length} AIML department archives...`);
-    for (const arch of dbData.archives) {
+  const archivesList = dbData.event_archives || dbData.archives || [];
+  if (archivesList.length > 0) {
+    console.log(`📦 Migrating ${archivesList.length} AIML department archives...`);
+    for (const arch of archivesList) {
       const { error: archErr } = await supabase.from('event_archives').upsert(arch, { onConflict: 'slug' });
       if (archErr) {
         console.warn(`⚠️ Archive "${arch.event_name}" warning:`, archErr.message);
