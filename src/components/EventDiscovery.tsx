@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Layers, AlertCircle } from 'lucide-react';
+import { Search, Layers, AlertCircle, RotateCcw } from 'lucide-react';
 import EventCard from './EventCard';
 import { EventItem, EventCategory, EventTheme } from '@/lib/types';
+import { SkeletonEventGrid, SkeletonBase } from '@/components/skeleton';
 
 interface EventDiscoveryProps {
   initialEvents: (EventItem & {
@@ -13,9 +14,18 @@ interface EventDiscoveryProps {
     registration_count?: number;
   })[];
   categories: EventCategory[];
+  isLoading?: boolean;
+  isTimedOut?: boolean;
+  onRetry?: () => void;
 }
 
-export default function EventDiscovery({ initialEvents, categories }: EventDiscoveryProps) {
+export default function EventDiscovery({
+  initialEvents,
+  categories,
+  isLoading = false,
+  isTimedOut = false,
+  onRetry,
+}: EventDiscoveryProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -80,44 +90,58 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
         {/* Stats pill */}
         <div className="text-left md:text-right">
           <span className="text-[11px] font-semibold text-[#77736A] uppercase tracking-wider">Showing</span>
-          <p className="text-xl font-black text-[#252525]">
-            <span className="text-[#C99A27]">{filteredEvents.length}</span> of {initialEvents.length} Events
-          </p>
+          {isLoading ? (
+            <SkeletonBase className="w-28 h-7 rounded-full mt-1" />
+          ) : (
+            <p className="text-xl font-black text-[#252525]">
+              <span className="text-[#C99A27]">{filteredEvents.length}</span> of {initialEvents.length} Events
+            </p>
+          )}
         </div>
       </div>
 
       {/* Floating Spatial Category Pills Bar */}
       <div className="relative mb-8 pb-3 border-b border-[#F0E8D4]">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-1">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black whitespace-nowrap transition-all duration-200 ${
-              selectedCategory === 'all'
-                ? 'bg-[#FFE99A] text-[#252525] border border-[#E7B83F] shadow-[0_4px_12px_rgba(231,184,63,0.25)]'
-                : 'text-[#252525] hover:text-[#C99A27] bg-white hover:bg-[#FFF9E8] border border-[#F0E8D4] shadow-sm'
-            }`}
-          >
-            All Events ({initialEvents.length})
-          </button>
+        {isLoading ? (
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" aria-hidden="true">
+            <SkeletonBase className="w-24 sm:w-28 h-9 sm:h-10 rounded-full shrink-0" />
+            <SkeletonBase className="w-28 sm:w-32 h-9 sm:h-10 rounded-full shrink-0" />
+            <SkeletonBase className="w-32 sm:w-36 h-9 sm:h-10 rounded-full shrink-0" />
+            <SkeletonBase className="w-24 sm:w-28 h-9 sm:h-10 rounded-full shrink-0" />
+            <SkeletonBase className="w-28 sm:w-32 h-9 sm:h-10 rounded-full shrink-0" />
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-1">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-black whitespace-nowrap transition-all duration-200 ${
+                selectedCategory === 'all'
+                  ? 'bg-[#FFE99A] text-[#252525] border border-[#E7B83F] shadow-[0_4px_12px_rgba(231,184,63,0.25)]'
+                  : 'text-[#252525] hover:text-[#C99A27] bg-white hover:bg-[#FFF9E8] border border-[#F0E8D4] shadow-sm'
+              }`}
+            >
+              All Events ({initialEvents.length})
+            </button>
 
-          {categories.map((cat) => {
-            const count = initialEvents.filter((e) => e.category_id === cat.id).length;
-            const isSelected = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-[#FFE99A] text-[#252525] border border-[#E7B83F] shadow-[0_4px_12px_rgba(231,184,63,0.25)]'
-                    : 'text-[#252525] hover:text-[#C99A27] bg-white hover:bg-[#FFF9E8] border border-[#F0E8D4] shadow-sm'
-                }`}
-              >
-                {cat.category_name} {count > 0 && `(${count})`}
-              </button>
-            );
-          })}
-        </div>
+            {categories.map((cat) => {
+              const count = initialEvents.filter((e) => e.category_id === cat.id).length;
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-[#FFE99A] text-[#252525] border border-[#E7B83F] shadow-[0_4px_12px_rgba(231,184,63,0.25)]'
+                      : 'text-[#252525] hover:text-[#C99A27] bg-white hover:bg-[#FFF9E8] border border-[#F0E8D4] shadow-sm'
+                  }`}
+                >
+                  {cat.category_name} {count > 0 && `(${count})`}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Search & Filter Toolbar in Spatial Floating Containers */}
@@ -130,10 +154,11 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
             type="text"
             placeholder="Search by event title, department, venue..."
             value={searchQuery}
+            disabled={isLoading}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-14 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] placeholder-[#77736A] text-xs sm:text-sm focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm transition-all"
+            className="w-full pl-11 pr-14 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] placeholder-[#77736A] text-xs sm:text-sm focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm transition-all disabled:opacity-60"
           />
-          {searchQuery && (
+          {searchQuery && !isLoading && (
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#77736A] hover:text-[#252525]"
@@ -148,8 +173,9 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
           <select
             aria-label="Filter events by status"
             value={statusFilter}
+            disabled={isLoading}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm cursor-pointer transition-all"
+            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm cursor-pointer transition-all disabled:opacity-60"
           >
             <option value="all">All Timelines</option>
             <option value="upcoming">Upcoming Events</option>
@@ -163,8 +189,9 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
           <select
             aria-label="Sort events"
             value={sortBy}
+            disabled={isLoading}
             onChange={(e) => setSortBy(e.target.value as 'date' | 'newest')}
-            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm cursor-pointer transition-all"
+            className="w-full px-4 py-3 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 shadow-spatial-sm cursor-pointer transition-all disabled:opacity-60"
           >
             <option value="date">Sort by Event Date</option>
             <option value="newest">Sort by Recently Added</option>
@@ -173,8 +200,31 @@ export default function EventDiscovery({ initialEvents, categories }: EventDisco
 
       </div>
 
-      {/* Events Rectangular Grid (2 events per row across all screens) */}
-      {filteredEvents.length > 0 ? (
+      {/* Prolonged Loading State with Retry Option */}
+      {isLoading && isTimedOut && (
+        <div className="mb-6 p-4 rounded-2xl bg-[#FFF9E8] border border-[#E7B83F] shadow-spatial-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-[#C99A27] shrink-0" />
+            <p className="text-xs sm:text-sm font-semibold text-[#252525]">
+              Loading events is taking longer than expected. Please verify your connection.
+            </p>
+          </div>
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs bg-[#FFE99A] hover:bg-[#E7B83F] text-[#252525] shadow-sm transition-all"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Events Rectangular Grid / Skeleton Grid */}
+      {isLoading ? (
+        <SkeletonEventGrid count={6} />
+      ) : filteredEvents.length > 0 ? (
         <motion.div 
           layout
           className="grid grid-cols-2 gap-3 sm:gap-6 lg:gap-8"

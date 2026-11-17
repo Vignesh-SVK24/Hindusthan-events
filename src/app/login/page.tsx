@@ -25,10 +25,11 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import LogoIntro from '@/components/LogoIntro';
+import { SkeletonBase, SkeletonTitle, SkeletonText, SkeletonButton, SkeletonInput } from '@/components/skeleton';
 
 export default function UnifiedLoginPage() {
   const router = useRouter();
-  const { user, isAdmin, isUser, loginAdmin, loginWithGoogle, sendEmailOtp, verifyEmailOtp, logout } = useAuth();
+  const { user, isAdmin, isUser, isLoading: authChecking, loginAdmin, loginWithGoogle, sendEmailOtp, verifyEmailOtp, logout } = useAuth();
 
   // Intro animation state: Show if visitor hasn't seen intro this session
   const [showIntro, setShowIntro] = useState(false);
@@ -377,8 +378,30 @@ export default function UnifiedLoginPage() {
             className="w-full max-w-md"
           >
             
-            {/* If user is already authenticated */}
-            {user ? (
+            {/* If checking auth session */}
+            {authChecking ? (
+              <div
+                aria-busy="true"
+                aria-label="Verifying authentication session"
+                className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18)] space-y-6"
+              >
+                <div className="space-y-2">
+                  <SkeletonBase className="w-32 h-6 rounded-full" />
+                  <SkeletonTitle width="w-48" height="h-7" />
+                  <SkeletonText width="w-64" height="h-3.5" />
+                </div>
+                <SkeletonButton size="h-12 w-full rounded-2xl" />
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-[#F0E8D4]" />
+                  <SkeletonText width="w-12" height="h-3" />
+                  <div className="flex-1 h-px bg-[#F0E8D4]" />
+                </div>
+                <div className="space-y-4">
+                  <SkeletonInput height="h-12 rounded-2xl" />
+                  <SkeletonButton size="h-12 w-full rounded-2xl" />
+                </div>
+              </div>
+            ) : user ? (
               <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_8px_24px_rgba(0,0,0,0.06)] space-y-6 text-center">
                 <div className="w-16 h-16 rounded-full bg-[#FFF9E8] border border-[#FFE99A] mx-auto flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8 text-emerald-600" />

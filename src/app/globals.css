@@ -150,3 +150,57 @@ body {
   animation: pulse-subtle 12s ease-in-out infinite;
   will-change: transform, opacity;
 }
+
+/* ==========================================================================
+   SPATIAL UI SKELETON SHIMMER LOADING SYSTEM
+   - GPU-accelerated left-to-right linear shimmer (1.6s duration)
+   - Warm cream, soft ivory, and golden amber tone palette
+   - CLS = 0 (prevents layout shifts)
+   - Fully accessible with prefers-reduced-motion fallback
+   ========================================================================== */
+
+@keyframes spatial-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.spatial-shimmer {
+  background: linear-gradient(
+    90deg,
+    #F7F3E6 0%,
+    #FFFDF5 35%,
+    #FFE99A 50%,
+    #FFFDF5 65%,
+    #F7F3E6 100%
+  );
+  background-size: 200% 100%;
+  animation: spatial-shimmer 1.6s linear infinite;
+  will-change: background-position;
+}
+
+.spatial-shimmer-subtle {
+  background: linear-gradient(
+    90deg,
+    #F3EEDC 0%,
+    #FAF7ED 40%,
+    #FFF9E8 50%,
+    #FAF7ED 60%,
+    #F3EEDC 100%
+  );
+  background-size: 200% 100%;
+  animation: spatial-shimmer 1.6s linear infinite;
+  will-change: background-position;
+}
+
+/* Accessibility: Respect users who requested reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .spatial-shimmer,
+  .spatial-shimmer-subtle {
+    animation: none !important;
+    background: #F4EFE0 !important;
+  }
+}

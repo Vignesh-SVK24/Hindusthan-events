@@ -20,6 +20,7 @@ import {
   PlusCircle,
   FileSpreadsheet,
 } from 'lucide-react';
+import { SkeletonBase } from '@/components/skeleton';
 
 interface NavbarProps {
   onReplayIntro?: () => void;
@@ -27,7 +28,7 @@ interface NavbarProps {
 
 export default function Navbar({ onReplayIntro }: NavbarProps) {
   const router = useRouter();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isLoading, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -133,7 +134,15 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
 
           {/* Right Action / Authenticated User Profile Menu */}
           <div className="hidden md:flex items-center space-x-2.5">
-            {user ? (
+            {isLoading ? (
+              <div aria-hidden="true" className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full bg-[#FFFDF5] border border-[#F0E8D4]">
+                <SkeletonBase className="w-8 h-8 rounded-full" />
+                <div className="flex flex-col gap-1">
+                  <SkeletonBase className="w-16 h-3 rounded-full" />
+                  <SkeletonBase className="w-12 h-2 rounded-full" />
+                </div>
+              </div>
+            ) : user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"

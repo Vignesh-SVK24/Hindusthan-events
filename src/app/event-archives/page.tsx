@@ -18,8 +18,11 @@ import {
   RotateCcw,
   BookOpen,
   CheckCircle2,
-  Filter
+  Filter,
+  AlertCircle
 } from 'lucide-react';
+import { SkeletonArchiveGrid } from '@/components/skeleton';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 
 export default function EventArchivesPage() {
   const [archives, setArchives] = useState<EventArchive[]>([]);
@@ -31,20 +34,24 @@ export default function EventArchivesPage() {
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('all');
 
-  useEffect(() => {
-    async function fetchArchives() {
-      try {
-        const res = await fetch('/api/archives');
-        const data = await res.json();
-        if (data.archives) {
-          setArchives(data.archives);
-        }
-      } catch (err) {
-        console.error('Failed to load archives:', err);
-      } finally {
-        setLoading(false);
+  const { showSkeleton, isTimedOut } = useDelayedLoading(loading, { delay: 150, minDuration: 350, timeout: 8000 });
+
+  const fetchArchives = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/archives');
+      const data = await res.json();
+      if (data.archives) {
+        setArchives(data.archives);
       }
+    } catch (err) {
+      console.error('Failed to load archives:', err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchArchives();
   }, []);
 
@@ -237,12 +244,28 @@ export default function EventArchivesPage() {
           </div>
         </div>
 
-        {/* Archives Grid */}
-        {loading ? (
-          <div className="py-24 text-center">
-            <div className="inline-block w-8 h-8 border-4 border-[#E7B83F] border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-[#77736A] text-xs sm:text-sm font-semibold">Loading historical archives...</p>
+        {/* Prolonged Loading State Alert */}
+        {showSkeleton && isTimedOut && (
+          <div className="mb-6 p-4 rounded-2xl bg-[#FFF9E8] border border-[#E7B83F] shadow-spatial-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-[#C99A27] shrink-0" />
+              <p className="text-xs sm:text-sm font-semibold text-[#252525]">
+                Loading archives is taking longer than expected. Please verify your connection.
+              </p>
+            </div>
+            <button
+              onClick={fetchArchives}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs bg-[#FFE99A] hover:bg-[#E7B83F] text-[#252525] shadow-sm transition-all"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </button>
           </div>
+        )}
+
+        {/* Archives Grid */}
+        {showSkeleton ? (
+          <SkeletonArchiveGrid count={6} />
         ) : filteredArchives.length === 0 ? (
           <div className="text-center py-20 rounded-3xl bg-white border border-[#F0E8D4] p-8 shadow-spatial-sm">
             <BookOpen className="w-12 h-12 text-[#C99A27] mx-auto mb-3 opacity-60" />

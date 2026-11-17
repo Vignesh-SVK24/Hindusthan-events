@@ -31,6 +31,7 @@ import {
 import { EventItem, EventCategory, EventTheme, ThemePreset } from '@/lib/types';
 import { THEME_PRESETS } from '@/lib/themePresets';
 import AdminArchiveManager from '@/components/AdminArchiveManager';
+import { SkeletonDashboard, SkeletonTable, SkeletonBase } from '@/components/skeleton';
 
 export default function AdminPage() {
   const { user, isAdmin, isLoading, logout } = useAuth();
@@ -40,6 +41,7 @@ export default function AdminPage() {
   const [events, setEvents] = useState<(EventItem & { category?: EventCategory; theme?: EventTheme; registration_count?: number })[]>([]);
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
   // Search & filter in Manage table
   const [manageSearch, setManageSearch] = useState('');
@@ -110,6 +112,7 @@ export default function AdminPage() {
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   const loadAdminData = async () => {
+    setDataLoading(true);
     try {
       const [statsRes, eventsRes, catRes, regRes] = await Promise.all([
         fetch('/api/admin/stats'),
@@ -136,6 +139,8 @@ export default function AdminPage() {
       }
     } catch (err) {
       console.error('Error loading admin data:', err);
+    } finally {
+      setDataLoading(false);
     }
   };
 
@@ -346,8 +351,33 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FFFDF5] flex items-center justify-center text-[#252525]">
-        <div className="w-8 h-8 border-4 border-[#E7B83F] border-t-transparent rounded-full animate-spin" />
+      <div aria-busy="true" aria-label="Loading Admin Console" className="min-h-screen bg-[#FFFDF5] text-[#252525] flex flex-col">
+        {/* Header Skeleton */}
+        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-[#F0E8D4]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <SkeletonBase className="w-9 h-9 rounded-xl" />
+              <SkeletonBase className="w-32 h-6 rounded-full" />
+              <span className="text-[#F0E8D4]">|</span>
+              <SkeletonBase className="w-24 h-6 rounded-full" />
+            </div>
+            <div className="flex items-center gap-3">
+              <SkeletonBase className="w-24 h-8 rounded-full" />
+              <SkeletonBase className="w-8 h-8 rounded-full" />
+            </div>
+          </div>
+        </header>
+
+        {/* Workspace Skeleton */}
+        <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <div className="flex items-center gap-2 pb-2">
+            <SkeletonBase className="w-28 h-10 rounded-full" />
+            <SkeletonBase className="w-32 h-10 rounded-full" />
+            <SkeletonBase className="w-36 h-10 rounded-full" />
+            <SkeletonBase className="w-36 h-10 rounded-full" />
+          </div>
+          <SkeletonDashboard />
+        </div>
       </div>
     );
   }
@@ -499,34 +529,37 @@ export default function AdminPage() {
 
         {/* TAB 1: OVERVIEW */}
         {activeTab === 'overview' && (
-          <div className="space-y-8 animate-in fade-in duration-200">
-            {stats && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
-                  <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Total Events</p>
-                  <p className="text-3xl font-black text-[#252525] mt-1">{stats.total}</p>
-                  <p className="text-[11px] text-[#C99A27] font-semibold mt-1">{stats.published} Published • {stats.drafts} Drafts</p>
-                </div>
+          dataLoading && !stats ? (
+            <SkeletonDashboard />
+          ) : (
+            <div className="space-y-8 animate-in fade-in duration-200">
+              {stats && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
+                    <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Total Events</p>
+                    <p className="text-3xl font-black text-[#252525] mt-1">{stats.total}</p>
+                    <p className="text-[11px] text-[#C99A27] font-semibold mt-1">{stats.published} Published • {stats.drafts} Drafts</p>
+                  </div>
 
-                <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
-                  <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Registration ON</p>
-                  <p className="text-3xl font-black text-emerald-600 mt-1">{stats.regEnabled}</p>
-                  <p className="text-[11px] text-[#77736A] font-semibold mt-1">{stats.regDisabled} Closed Events</p>
-                </div>
+                  <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
+                    <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Registration ON</p>
+                    <p className="text-3xl font-black text-emerald-600 mt-1">{stats.regEnabled}</p>
+                    <p className="text-[11px] text-[#77736A] font-semibold mt-1">{stats.regDisabled} Closed Events</p>
+                  </div>
 
-                <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
-                  <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Total Registrations</p>
-                  <p className="text-3xl font-black text-[#252525] mt-1">{stats.totalRegistrations}</p>
-                  <p className="text-[11px] text-[#C99A27] font-semibold mt-1">Across all published events</p>
-                </div>
+                  <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
+                    <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Total Registrations</p>
+                    <p className="text-3xl font-black text-[#252525] mt-1">{stats.totalRegistrations}</p>
+                    <p className="text-[11px] text-[#C99A27] font-semibold mt-1">Across all published events</p>
+                  </div>
 
-                <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
-                  <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Upcoming Events</p>
-                  <p className="text-3xl font-black text-[#C99A27] mt-1">{stats.upcoming}</p>
-                  <p className="text-[11px] text-[#77736A] font-semibold mt-1">{stats.ongoing} Ongoing right now</p>
+                  <div className="p-5 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
+                    <p className="text-[11px] text-[#77736A] uppercase font-bold tracking-wider">Upcoming Events</p>
+                    <p className="text-3xl font-black text-[#C99A27] mt-1">{stats.upcoming}</p>
+                    <p className="text-[11px] text-[#77736A] font-semibold mt-1">{stats.ongoing} Ongoing right now</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Recent Events & Shortcuts */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -620,6 +653,7 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+          )
         )}
 
         {/* TAB 2: MANAGE EVENTS TABLE */}
@@ -649,6 +683,9 @@ export default function AdminPage() {
               </button>
             </div>
 
+            {dataLoading && events.length === 0 ? (
+              <SkeletonTable columns={7} rows={6} showToolbar={false} />
+            ) : (
             <div className="rounded-3xl border border-[#F0E8D4] bg-white overflow-hidden shadow-spatial">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
@@ -762,6 +799,7 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
+            )}
           </div>
         )}
 
@@ -1220,6 +1258,9 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {dataLoading && registrations.length === 0 ? (
+              <SkeletonTable columns={6} rows={6} showToolbar={false} />
+            ) : (
             <div className="rounded-3xl border border-[#F0E8D4] bg-white overflow-hidden shadow-spatial">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
@@ -1267,6 +1308,7 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
+            )}
           </div>
         )}
 

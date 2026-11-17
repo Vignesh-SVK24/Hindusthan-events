@@ -11,6 +11,7 @@ import AimlArchiveBanner from '@/components/AimlArchiveBanner';
 import Footer from '@/components/Footer';
 import LogoIntro from '@/components/LogoIntro';
 import { EventItem, EventCategory, EventTheme } from '@/lib/types';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 
 export default function HomePage() {
   const router = useRouter();
@@ -21,9 +22,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [replayIntro, setReplayIntro] = useState(false);
 
-  // Check initial entry sequence:
-  // If visitor is unauthenticated, the intro plays first and transitions to /login,
-  // making /login the default landing experience for unauthenticated users.
+  const { showSkeleton, isTimedOut } = useDelayedLoading(loading, { delay: 150, minDuration: 350, timeout: 8000 });
+
   useEffect(() => {
     if (!authLoading && !user) {
       const viewed = typeof window !== 'undefined' ? sessionStorage.getItem('hindusthan_intro_viewed') : null;
@@ -34,26 +34,27 @@ export default function HomePage() {
     }
   }, [authLoading, user, router]);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [evRes, catRes] = await Promise.all([
-          fetch('/api/events?publicOnly=true'),
-          fetch('/api/categories'),
-        ]);
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [evRes, catRes] = await Promise.all([
+        fetch('/api/events?publicOnly=true'),
+        fetch('/api/categories'),
+      ]);
 
-        const evData = await evRes.json();
-        const catData = await catRes.json();
+      const evData = await evRes.json();
+      const catData = await catRes.json();
 
-        if (evData.events) setEvents(evData.events);
-        if (catData.categories) setCategories(catData.categories);
-      } catch (err) {
-        console.error('Failed to load initial data:', err);
-      } finally {
-        setLoading(false);
-      }
+      if (evData.events) setEvents(evData.events);
+      if (catData.categories) setCategories(catData.categories);
+    } catch (err) {
+      console.error('Failed to load initial data:', err);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -80,17 +81,20 @@ export default function HomePage() {
       <Navbar onReplayIntro={() => setReplayIntro(true)} />
 
       {/* Spatial Hero Section */}
-      <HeroSection featuredEvent={featuredEvent} totalEventsCount={events.length} />
+      <HeroSection
+        featuredEvent={featuredEvent}
+        totalEventsCount={events.length}
+        isLoading={showSkeleton}
+      />
 
       {/* Central Event Discovery & Categorized Rectangular Divisions */}
-      {loading ? (
-        <div className="py-24 text-center">
-          <div className="inline-block w-8 h-8 border-4 border-[#E7B83F] border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-[#77736A] text-xs sm:text-sm font-semibold">Loading college events directory...</p>
-        </div>
-      ) : (
-        <EventDiscovery initialEvents={events} categories={categories} />
-      )}
+      <EventDiscovery
+        initialEvents={events}
+        categories={categories}
+        isLoading={showSkeleton}
+        isTimedOut={isTimedOut}
+        onRetry={loadData}
+      />
 
       {/* AIML Historical Archives Highlight */}
       <AimlArchiveBanner />

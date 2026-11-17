@@ -7,13 +7,15 @@ import { motion } from 'framer-motion';
 import { Sparkles, Calendar, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { EventItem } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
+import { SkeletonHeroSpotlight } from '@/components/skeleton';
 
 interface HeroSectionProps {
   featuredEvent?: EventItem;
   totalEventsCount: number;
+  isLoading?: boolean;
 }
 
-export default function HeroSection({ featuredEvent, totalEventsCount }: HeroSectionProps) {
+export default function HeroSection({ featuredEvent, totalEventsCount, isLoading = false }: HeroSectionProps) {
   const { isAdmin } = useAuth();
 
   return (
@@ -127,7 +129,9 @@ export default function HeroSection({ featuredEvent, totalEventsCount }: HeroSec
 
           {/* Right Column: Featured Event Spatial Floating Showcase */}
           <div className="lg:col-span-5">
-            {featuredEvent ? (
+            {isLoading ? (
+              <SkeletonHeroSpotlight />
+            ) : featuredEvent ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
