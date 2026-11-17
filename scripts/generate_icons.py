@@ -92,4 +92,10 @@ im_transparent.resize((512, 512), Image.Resampling.LANCZOS).save(
     os.path.join(PUBLIC_DIR, "app-icon.png"), "PNG"
 )
 
+# Maskable Android Icon (512x512 with safe-zone padding)
+maskable_512 = Image.new("RGBA", (512, 512), (255, 253, 245, 255))
+inner_410 = im_transparent.resize((410, 410), Image.Resampling.LANCZOS)
+maskable_512.paste(inner_410, (51, 51), inner_410)
+maskable_512.save(os.path.join(PUBLIC_DIR, "maskable-icon-512.png"), "PNG")
+
 print("All icons successfully generated!")

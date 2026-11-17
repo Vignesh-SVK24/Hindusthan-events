@@ -2,10 +2,18 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import SpatialBackground from '@/components/SpatialBackground';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
   title: 'HINDUSTHAN COLLEGE OF ENGINEERING AND TECHNOLOGY — Events & Discovery Hub',
   description: 'Official central events hub for Hindusthan College of Engineering and Technology (HiCET). Discover hackathons, cultural festivals, symposia, and athletic championships with bespoke dynamic webpages and real-time registration.',
+  manifest: '/manifest.json',
+  applicationName: 'HiCET Events Hub',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'HiCET Events',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -56,6 +64,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-[#FFFDF5] text-[#252525] selection:bg-[#FFE99A] selection:text-[#252525] relative min-h-screen">
         <SpatialBackground />
+        <ServiceWorkerRegister />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
