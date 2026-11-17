@@ -27,6 +27,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { EventItem, EventCategory, EventTheme, EventMedia, EventRegistration } from '@/lib/types';
+import { useAuth } from '@/context/AuthContext';
 
 interface EventPageClientProps {
   initialEvent: EventItem & {
@@ -40,6 +41,7 @@ interface EventPageClientProps {
 export default function EventPageClient({ initialEvent }: EventPageClientProps) {
   const [event, setEvent] = useState(initialEvent);
   const theme = event.theme;
+  const { user } = useAuth();
 
   // Registration State
   const [isRegistered, setIsRegistered] = useState(false);
@@ -59,6 +61,17 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
     year: '1st Year',
     contact_number: '',
   });
+
+  // Pre-fill student info if authenticated
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        full_name: prev.full_name || user.full_name || '',
+        email: prev.email || user.email || '',
+      }));
+    }
+  }, [user]);
 
   // Live Countdown calculation
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({

@@ -251,14 +251,14 @@ export default function Navbar({ onReplayIntro }: NavbarProps) {
                         <span>AIML Historical Archives</span>
                       </Link>
 
-                      <Link
-                        href="/login"
-                        onClick={() => setProfileDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#555] hover:bg-[#FFF9E8] rounded-xl transition-colors"
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#555] hover:bg-[#FFF9E8] rounded-xl transition-colors text-left cursor-pointer"
                       >
                         <User className="w-3.5 h-3.5 text-[#77736A]" />
                         <span>Switch Account</span>
-                      </Link>
+                      </button>
                     </div>
 
                     {/* Logout Button */}

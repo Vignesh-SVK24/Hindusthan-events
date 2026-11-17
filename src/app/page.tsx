@@ -61,7 +61,7 @@ export default function HomePage() {
     setReplayIntro(false);
     sessionStorage.setItem('hindusthan_intro_viewed', 'true');
     // If not authenticated, smoothly transition to /login upon intro completion
-    if (!authLoading && !user) {
+    if (!user) {
       router.push('/login');
     }
   };
@@ -73,6 +73,7 @@ export default function HomePage() {
       {/* Opening Animated College Logo Zoom-Out Intro */}
       <LogoIntro
         forceShow={replayIntro}
+        disabled={!replayIntro && !!user}
         onComplete={handleIntroComplete}
       />
 

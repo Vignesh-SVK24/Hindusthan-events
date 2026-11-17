@@ -28,15 +28,37 @@ import LogoIntro from '@/components/LogoIntro';
 
 export default function UnifiedLoginPage() {
   const router = useRouter();
-  const { user, isAdmin, isUser, loginAdmin, loginWithGoogle, sendEmailOtp, verifyEmailOtp, logout } = useAuth();
+  const { 
+    user, 
+    isAdmin, 
+    isUser, 
+    isLoading: authLoading, 
+    loginAdmin, 
+    loginWithGoogle, 
+    sendEmailOtp, 
+    verifyEmailOtp, 
+    logout 
+  } = useAuth();
 
-  // Intro animation state: Show if visitor hasn't seen intro this session
-  const [showIntro, setShowIntro] = useState(false);
+  // Persistent Auth Check: If session already exists, skip login entirely!
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(isAdmin ? '/admin' : '/');
+    }
+  }, [authLoading, user, isAdmin, router]);
+
+  // Intro animation state: Show immediately if visitor hasn't seen intro this session
+  const [showIntro, setShowIntro] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return !sessionStorage.getItem('hindusthan_intro_viewed');
+    }
+    return true;
+  });
 
   useEffect(() => {
     const introViewed = sessionStorage.getItem('hindusthan_intro_viewed');
-    if (!introViewed) {
-      setShowIntro(true);
+    if (introViewed) {
+      setShowIntro(false);
     }
   }, []);
 
@@ -189,6 +211,43 @@ export default function UnifiedLoginPage() {
     }
   };
 
+  // Anti-Flicker & Session Guarantee: If checking session or session is valid, show campus loader and transition immediately
+  if (authLoading || user) {
+    return (
+      <main className="min-h-screen w-full flex items-center justify-center relative overflow-hidden text-[#252525]">
+        {/* Full-Screen Background: HICET Campus Front View (Desktop Only) */}
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden hidden md:block">
+          <div className="absolute inset-0 w-full h-full">
+            <Image
+              src="/hicet-campus.jpg"
+              alt="HICET Campus"
+              fill
+              priority
+              quality={95}
+              className="object-cover object-center"
+              sizes="100vw"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FFFDF5]/40 via-transparent to-[#FFFDF5]/50" />
+          <div className="absolute inset-0 bg-[#FFFDF5]/20 backdrop-blur-sm" />
+        </div>
+
+        {/* Spatial Session Status Loader */}
+        <div className="relative z-10 p-8 rounded-3xl bg-white/95 backdrop-blur-xl border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_8px_24px_rgba(0,0,0,0.06)] flex flex-col items-center gap-4 max-w-sm text-center">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FFE99A] to-[#E7B83F] flex items-center justify-center shadow-spatial-sm">
+            <Loader2 className="w-6 h-6 text-[#252525] animate-spin" />
+          </div>
+          <div>
+            <h3 className="font-extrabold text-[#252525] text-base">HICET Events Hub</h3>
+            <p className="text-xs text-[#77736A] mt-1 font-medium">
+              {user ? 'Session verified. Entering campus...' : 'Verifying campus authentication...'}
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen w-full text-[#252525] selection:bg-[#FFE99A] selection:text-[#252525] flex flex-col justify-between relative overflow-x-hidden">
       
@@ -207,9 +266,9 @@ export default function UnifiedLoginPage() {
 
       {/* ========================================================= */}
       {/* 2. FULL-SCREEN BACKGROUND: HICET CAMPUS FRONT VIEW        */}
-      {/* Minimal Gradient Level for Maximum Campus Clarity         */}
+      {/* Minimal Gradient Level for Maximum Campus Clarity (Desktop) */}
       {/* ========================================================= */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden hidden md:block">
         <div className="absolute inset-0 w-full h-full">
           <Image
             src="/hicet-campus.jpg"
@@ -235,7 +294,7 @@ export default function UnifiedLoginPage() {
         {/* ========================================================= */}
         {/* LEFT SECTION – HICET BRANDING (~55% width on desktop)    */}
         {/* ========================================================= */}
-        <section className="w-full lg:w-[55%] xl:w-[56%] flex flex-col justify-between p-4 sm:p-8 md:p-10 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-[#F0E8D4]/40">
+        <section className="hidden lg:flex w-full lg:w-[55%] xl:w-[56%] flex-col justify-between p-8 md:p-10 lg:p-12 xl:p-16 border-r border-[#F0E8D4]/40">
           
           {/* Top Bar: Navigation & Campus Events Badge */}
           <motion.div 
@@ -374,45 +433,25 @@ export default function UnifiedLoginPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
-            className="w-full max-w-md"
+            className="w-full max-w-md my-auto py-4"
           >
-            
-            {/* If user is already authenticated */}
-            {user ? (
-              <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_8px_24px_rgba(0,0,0,0.06)] space-y-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-[#FFF9E8] border border-[#FFE99A] mx-auto flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-                </div>
-                
-                <div className="space-y-1">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-[#C99A27] bg-[#FFF9E8] px-3 py-1 rounded-full border border-[#F0E8D4]">
-                    {isAdmin ? 'Administrator' : 'Campus Member'}
-                  </span>
-                  <h2 className="text-xl sm:text-2xl font-black text-[#252525]">
-                    Signed in as {user.full_name}
-                  </h2>
-                  <p className="text-xs text-[#77736A]">{user.email}</p>
-                </div>
-
-                <div className="pt-2 space-y-3">
-                  <Link
-                    href={isAdmin ? '/admin' : '/'}
-                    className="w-full py-3.5 rounded-2xl font-black text-sm text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] shadow-spatial flex items-center justify-center gap-2 transition-all"
-                  >
-                    <span>{isAdmin ? 'Go to Admin Console →' : 'Continue to Campus Homepage →'}</span>
-                  </Link>
-
-                  <button
-                    onClick={() => logout()}
-                    className="w-full py-2.5 rounded-2xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors"
-                  >
-                    Switch Account / Log Out
-                  </button>
-                </div>
+            {/* Mobile Top Navigation & Campus Badge (Mobile Only) */}
+            <div className="flex lg:hidden items-center justify-between gap-3 mb-5">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-[#FFE99A] border border-[#F0E8D4] text-xs font-bold text-[#252525] shadow-spatial-sm backdrop-blur-md transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Website</span>
+              </Link>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 border border-[#E7B83F]/40 text-[10px] font-black uppercase text-[#C99A27] shadow-spatial-sm backdrop-blur-md">
+                <Sparkles className="w-3 h-3 text-[#E7B83F]" />
+                <span>HICET Events</span>
               </div>
-            ) : (
-              /* Floating Spatial Login Card */
-              <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_8px_24px_rgba(0,0,0,0.06)] space-y-6">
+            </div>
+
+            {/* Floating Spatial Login Card */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-9 md:p-10 border border-[#F0E8D4] shadow-[0_20px_50px_rgba(231,184,63,0.18),0_8px_24px_rgba(0,0,0,0.06)] space-y-6">
                 
                 {/* Alert Messages (Errors or Success) */}
                 {error && (
@@ -814,8 +853,6 @@ export default function UnifiedLoginPage() {
                 </AnimatePresence>
 
               </div>
-            )}
-
           </motion.div>
 
         </section>
