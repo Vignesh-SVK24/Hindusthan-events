@@ -3,9 +3,8 @@ import * as localDb from '@/lib/db';
 import { EventItem, EventTheme, EventCategory, EventArchive } from '@/lib/types';
 
 /**
- * Dual-Mode Database Adapter
- * Seamlessly routes queries to Supabase PostgreSQL when credentials exist,
- * and falls back gracefully to local storage when unconfigured.
+ * HICET Events — Unified Supabase Database Adapter
+ * Authoritative Supabase PostgreSQL persistence with fault-tolerant schema adaptation.
  */
 
 // ============================================================================
@@ -23,24 +22,25 @@ export async function getCategories(): Promise<EventCategory[]> {
         return data as EventCategory[];
       }
     } catch (err) {
-      console.warn('Supabase categories fetch error, falling back to local storage:', err);
+      console.warn('Supabase categories fetch error:', err);
     }
   }
   return localDb.getDatabase().event_categories;
 }
 
 // ============================================================================
-// 2. EVENTS
+// 2. EVENTS RETRIEVAL
 // ============================================================================
-export async function getEvents(options: { publicOnly?: boolean; categoryId?: string; search?: string; includeDeleted?: boolean } = {}): Promise<any[]> {
+export async function getEvents(options: {
+  publicOnly?: boolean;
+  categoryId?: string;
+  search?: string;
+  includeDeleted?: boolean;
+} = {}): Promise<any[]> {
   const supabase = getSupabaseServerClient();
   if (supabase) {
     try {
       let query = supabase.from('events').select('*');
-
-      if (!options.includeDeleted) {
-        query = query.or('is_deleted.is.null,is_deleted.eq.false');
-      }
 
       if (options.publicOnly) {
         query = query.eq('publication_status', 'published');
@@ -56,16 +56,48 @@ export async function getEvents(options: { publicOnly?: boolean; categoryId?: st
 
       const { data, error } = await query;
       if (!error && data) {
-        return data.map((ev: any) => ({
-          ...ev,
-          start_date: ev.event_date || ev.start_date,
-          theme: ev.theme || {},
-        }));
+        // Fetch registration counts in one batch from Supabase
+        const { data: allRegs } = await supabase
+          .from('registrations')
+          .select('event_id')
+          .neq('registration_status', 'cancelled');
+
+        const regCountMap: Record<string, number> = {};
+        if (allRegs) {
+          allRegs.forEach((r: any) => {
+            regCountMap[r.event_id] = (regCountMap[r.event_id] || 0) + 1;
+          });
+        }
+
+        const filtered = data
+          .map((ev: any) => {
+            const isDeleted = ev.is_deleted === true || ev.theme?.is_deleted === true;
+            const eventStatus = ev.event_status || ev.theme?.event_status || (isDeleted ? 'trash' : ev.publication_status);
+            return {
+              ...ev,
+              start_date: ev.event_date || ev.start_date,
+              is_deleted: isDeleted,
+              deleted_at: ev.deleted_at || ev.theme?.deleted_at || null,
+              deleted_by: ev.deleted_by || ev.theme?.deleted_by || null,
+              restored_at: ev.restored_at || ev.theme?.restored_at || null,
+              restored_by: ev.restored_by || ev.theme?.restored_by || null,
+              event_status: eventStatus,
+              registration_count: regCountMap[ev.id] || 0,
+              theme: ev.theme || {},
+            };
+          })
+          .filter((ev: any) => {
+            if (options.includeDeleted) return true;
+            return !ev.is_deleted;
+          });
+
+        return filtered;
       }
     } catch (err) {
-      console.warn('Supabase events fetch error, falling back to local storage:', err);
+      console.warn('Supabase events fetch error, using local database:', err);
     }
   }
+
   return localDb.getAllEvents({
     publicOnly: options.publicOnly,
     category_id: options.categoryId,
@@ -74,43 +106,100 @@ export async function getEvents(options: { publicOnly?: boolean; categoryId?: st
   });
 }
 
-export async function getEventBySlug(slug: string, options: { includeDeleted?: boolean } = {}): Promise<any | null> {
+export async function getEventBySlug(
+  slug: string,
+  options: { includeDeleted?: boolean } = {}
+): Promise<any | null> {
   const supabase = getSupabaseServerClient();
   if (supabase) {
     try {
-      let query = supabase.from('events').select('*').eq('slug', slug);
-      if (!options.includeDeleted) {
-        // Query will fetch it, but we tag is_deleted if soft-deleted
-      }
-      const { data, error } = await query.single();
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+
       if (!error && data) {
-        if (!options.includeDeleted && data.is_deleted) {
-          return {
-            ...data,
-            is_deleted: true,
-            start_date: data.event_date || data.start_date,
-            theme: data.theme || {},
-          };
-        }
-        return {
+        const isDeleted = data.is_deleted === true || data.theme?.is_deleted === true;
+        const eventStatus = data.event_status || data.theme?.event_status || (isDeleted ? 'trash' : data.publication_status);
+
+        // Fetch exact registration count for this event
+        const { count } = await supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', data.id)
+          .neq('registration_status', 'cancelled');
+
+        const eventObj = {
           ...data,
           start_date: data.event_date || data.start_date,
+          is_deleted: isDeleted,
+          deleted_at: data.deleted_at || data.theme?.deleted_at || null,
+          deleted_by: data.deleted_by || data.theme?.deleted_by || null,
+          restored_at: data.restored_at || data.theme?.restored_at || null,
+          restored_by: data.restored_by || data.theme?.restored_by || null,
+          event_status: eventStatus,
+          registration_count: count || 0,
           theme: data.theme || {},
         };
+
+        if (!options.includeDeleted && isDeleted) {
+          return {
+            ...eventObj,
+            is_deleted: true,
+          };
+        }
+
+        return eventObj;
       }
     } catch (err) {
-      console.warn('Supabase event by slug error, falling back to local storage:', err);
+      console.warn('Supabase event by slug error, using local database:', err);
     }
   }
+
   return localDb.getEventBySlug(slug, options);
 }
 
-export async function createEvent(eventData: Partial<EventItem>, themeData?: Partial<EventTheme>, createdBy?: string): Promise<any> {
+// ============================================================================
+// 3. EVENT CREATION & PERSISTENCE
+// ============================================================================
+export async function createEvent(
+  eventData: Partial<EventItem>,
+  themeData?: Partial<EventTheme>,
+  createdBy?: string
+): Promise<any> {
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
-      const record = {
-        slug: eventData.slug || `event-${Date.now()}`,
+      // 1. Generate guaranteed unique slug
+      let baseSlug = (eventData.slug || eventData.title || `event-${Date.now()}`)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+
+      if (!baseSlug) baseSlug = `event-${Date.now()}`;
+
+      // Check slug collision in Supabase
+      const { data: existingSlug } = await supabase
+        .from('events')
+        .select('slug')
+        .eq('slug', baseSlug)
+        .maybeSingle();
+
+      const finalSlug = existingSlug
+        ? `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`
+        : baseSlug;
+
+      const themeWithMeta = {
+        ...(themeData || {}),
+        is_deleted: false,
+        event_status: eventData.event_status || 'published',
+        deleted_at: null,
+        deleted_by: null,
+      };
+
+      const record: any = {
+        slug: finalSlug,
         title: eventData.title || 'Untitled Event',
         tagline: eventData.tagline || '',
         short_description: eventData.short_description || '',
@@ -131,8 +220,6 @@ export async function createEvent(eventData: Partial<EventItem>, themeData?: Par
         registration_deadline: eventData.registration_deadline || null,
         maximum_participants: eventData.maximum_participants || null,
         publication_status: eventData.publication_status || 'published',
-        event_status: eventData.event_status || 'published',
-        is_deleted: false,
         eligibility: eventData.eligibility || '',
         highlights: eventData.highlights || [],
         rules: eventData.rules || [],
@@ -140,12 +227,13 @@ export async function createEvent(eventData: Partial<EventItem>, themeData?: Par
         prizes: eventData.prizes || [],
         coordinators: eventData.coordinators || [],
         sponsors: eventData.sponsors || [],
-        theme: themeData || {},
-        created_by: createdBy || null,
+        theme: themeWithMeta,
+        created_by: createdBy && createdBy.length === 36 ? createdBy : null,
       };
 
       const { data, error } = await supabase.from('events').insert(record).select().single();
       if (!error && data) {
+        // Record event history audit
         await supabase.from('event_history').insert({
           event_id: data.id,
           activity_type: 'CREATED',
@@ -153,13 +241,35 @@ export async function createEvent(eventData: Partial<EventItem>, themeData?: Par
           performed_by: createdBy || null,
         });
 
-        return data;
+        // Mirror to local memory for cache sync
+        try {
+          localDb.createEvent({
+            ...eventData,
+            slug: data.slug,
+            id: data.id,
+            start_date: eventData.start_date || '',
+            end_date: eventData.end_date || '',
+          } as any, themeData);
+        } catch (_) {}
+
+        return {
+          ...data,
+          start_date: data.event_date || data.start_date,
+          is_deleted: false,
+          event_status: 'published',
+          registration_count: 0,
+        };
+      } else if (error) {
+        console.error('Supabase createEvent error:', error);
+        throw new Error(error.message || 'Failed to save event to Supabase');
       }
-    } catch (err) {
-      console.warn('Supabase createEvent error, falling back to local storage:', err);
+    } catch (err: any) {
+      console.error('Supabase createEvent fatal error:', err);
+      throw err;
     }
   }
 
+  // Fallback to local database if Supabase is unconfigured
   return localDb.createEvent({
     title: eventData.title || 'Untitled Event',
     slug: eventData.slug || `event-${Date.now()}`,
@@ -195,18 +305,69 @@ export async function createEvent(eventData: Partial<EventItem>, themeData?: Par
   }, themeData);
 }
 
-export async function updateEvent(slug: string, eventData: Partial<EventItem>, themeData?: Partial<EventTheme>): Promise<any | null> {
+// ============================================================================
+// 4. EVENT UPDATING & PERSISTENCE
+// ============================================================================
+export async function updateEvent(
+  slug: string,
+  eventData: Partial<EventItem>,
+  themeData?: Partial<EventTheme>
+): Promise<any | null> {
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
-      const updates: any = { ...eventData };
-      if (eventData.start_date) updates.event_date = eventData.start_date;
-      if (themeData) updates.theme = themeData;
+      // Find current event in Supabase
+      const { data: current, error: findErr } = await supabase
+        .from('events')
+        .select('*')
+        .or(`slug.eq.${slug},id.eq.${slug}`)
+        .maybeSingle();
+
+      if (findErr || !current) {
+        throw new Error('Event not found in Supabase');
+      }
+
+      const updates: any = {};
+      if (eventData.title !== undefined) updates.title = eventData.title;
+      if (eventData.tagline !== undefined) updates.tagline = eventData.tagline;
+      if (eventData.short_description !== undefined) updates.short_description = eventData.short_description;
+      if (eventData.description !== undefined) updates.description = eventData.description;
+      if (eventData.category_id !== undefined) updates.category_id = eventData.category_id;
+      if (eventData.department !== undefined) updates.department = eventData.department;
+      if (eventData.organizer !== undefined) updates.organizer = eventData.organizer;
+      if (eventData.start_date !== undefined) updates.event_date = eventData.start_date;
+      if (eventData.end_date !== undefined) updates.end_date = eventData.end_date;
+      if (eventData.start_time !== undefined) updates.start_time = eventData.start_time;
+      if (eventData.end_time !== undefined) updates.end_time = eventData.end_time;
+      if (eventData.venue !== undefined) updates.venue = eventData.venue;
+      if (eventData.poster_url !== undefined) updates.poster_url = eventData.poster_url;
+      if (eventData.cover_image_url !== undefined) updates.cover_image_url = eventData.cover_image_url;
+      if (eventData.registration_enabled !== undefined) updates.registration_enabled = eventData.registration_enabled;
+      if (eventData.registration_type !== undefined) updates.registration_type = eventData.registration_type;
+      if (eventData.registration_url !== undefined) updates.registration_url = eventData.registration_url;
+      if (eventData.registration_deadline !== undefined) updates.registration_deadline = eventData.registration_deadline || null;
+      if (eventData.maximum_participants !== undefined) updates.maximum_participants = eventData.maximum_participants || null;
+      if (eventData.publication_status !== undefined) updates.publication_status = eventData.publication_status;
+      if (eventData.eligibility !== undefined) updates.eligibility = eventData.eligibility;
+      if (eventData.highlights !== undefined) updates.highlights = eventData.highlights;
+      if (eventData.rules !== undefined) updates.rules = eventData.rules;
+      if (eventData.schedule !== undefined) updates.schedule = eventData.schedule;
+      if (eventData.prizes !== undefined) updates.prizes = eventData.prizes;
+      if (eventData.coordinators !== undefined) updates.coordinators = eventData.coordinators;
+      if (eventData.sponsors !== undefined) updates.sponsors = eventData.sponsors;
+      updates.updated_at = new Date().toISOString();
+
+      if (themeData || current.theme) {
+        updates.theme = {
+          ...(current.theme || {}),
+          ...(themeData || {}),
+        };
+      }
 
       const { data, error } = await supabase
         .from('events')
         .update(updates)
-        .eq('slug', slug)
+        .eq('id', current.id)
         .select()
         .single();
 
@@ -216,10 +377,23 @@ export async function updateEvent(slug: string, eventData: Partial<EventItem>, t
           activity_type: 'UPDATED',
           activity_description: `Event "${data.title}" updated.`,
         });
-        return data;
+
+        try {
+          localDb.updateEvent(current.slug, eventData, themeData);
+        } catch (_) {}
+
+        return {
+          ...data,
+          start_date: data.event_date || data.start_date,
+          theme: data.theme || {},
+        };
+      } else if (error) {
+        console.error('Supabase updateEvent error:', error);
+        throw new Error(error.message || 'Failed to update event in Supabase');
       }
-    } catch (err) {
-      console.warn('Supabase updateEvent error, falling back to local storage:', err);
+    } catch (err: any) {
+      console.error('Supabase updateEvent fatal error:', err);
+      throw err;
     }
   }
 
@@ -228,21 +402,38 @@ export async function updateEvent(slug: string, eventData: Partial<EventItem>, t
   return localDb.updateEvent(existing.id, eventData, themeData);
 }
 
+// ============================================================================
+// 5. EVENT SOFT-DELETION & RECOVERY PROTOCOL
+// ============================================================================
 export async function softDeleteEvent(slug: string, deletedBy?: string): Promise<boolean> {
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
       const now = new Date().toISOString();
+      const { data: current } = await supabase
+        .from('events')
+        .select('id, title, theme')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (!current) return false;
+
+      const updatedTheme = {
+        ...(current.theme || {}),
+        is_deleted: true,
+        deleted_at: now,
+        deleted_by: deletedBy || null,
+        event_status: 'trash',
+      };
+
       const { data, error } = await supabase
         .from('events')
         .update({
-          is_deleted: true,
-          deleted_at: now,
-          deleted_by: deletedBy || null,
-          event_status: 'trash',
+          publication_status: 'unpublished',
+          theme: updatedTheme,
           updated_at: now,
         })
-        .eq('slug', slug)
+        .eq('id', current.id)
         .select()
         .single();
 
@@ -253,18 +444,21 @@ export async function softDeleteEvent(slug: string, deletedBy?: string): Promise
           activity_description: `Event "${data.title}" moved to trash.`,
           performed_by: deletedBy || null,
         });
-        localDb.softDeleteEvent(slug, deletedBy);
+
+        try {
+          localDb.softDeleteEvent(slug, deletedBy);
+        } catch (_) {}
+
         return true;
       }
     } catch (err) {
-      console.warn('Supabase softDeleteEvent error, falling back to local storage:', err);
+      console.error('Supabase softDeleteEvent error:', err);
     }
   }
 
   return localDb.softDeleteEvent(slug, deletedBy);
 }
 
-// Backwards-compatible alias for existing calls: safe soft deletion
 export const deleteEvent = softDeleteEvent;
 
 export async function restoreEvent(slug: string, restoredBy?: string): Promise<boolean> {
@@ -272,16 +466,30 @@ export async function restoreEvent(slug: string, restoredBy?: string): Promise<b
   if (supabase) {
     try {
       const now = new Date().toISOString();
+      const { data: current } = await supabase
+        .from('events')
+        .select('id, title, theme')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (!current) return false;
+
+      const updatedTheme = {
+        ...(current.theme || {}),
+        is_deleted: false,
+        restored_at: now,
+        restored_by: restoredBy || null,
+        event_status: 'published',
+      };
+
       const { data, error } = await supabase
         .from('events')
         .update({
-          is_deleted: false,
-          restored_at: now,
-          restored_by: restoredBy || null,
-          event_status: 'published',
+          publication_status: 'published',
+          theme: updatedTheme,
           updated_at: now,
         })
-        .eq('slug', slug)
+        .eq('id', current.id)
         .select()
         .single();
 
@@ -292,11 +500,15 @@ export async function restoreEvent(slug: string, restoredBy?: string): Promise<b
           activity_description: `Event "${data.title}" restored from trash.`,
           performed_by: restoredBy || null,
         });
-        localDb.restoreEvent(slug, restoredBy);
+
+        try {
+          localDb.restoreEvent(slug, restoredBy);
+        } catch (_) {}
+
         return true;
       }
     } catch (err) {
-      console.warn('Supabase restoreEvent error, falling back to local storage:', err);
+      console.error('Supabase restoreEvent error:', err);
     }
   }
 
@@ -307,16 +519,23 @@ export async function permanentDeleteEvent(slug: string): Promise<boolean> {
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
-      const { data: ev } = await supabase.from('events').select('id').eq('slug', slug).single();
+      const { data: ev } = await supabase.from('events').select('id, poster_url, cover_image_url').eq('slug', slug).maybeSingle();
       if (ev) {
+        // 1. Remove registrations
         await supabase.from('registrations').delete().eq('event_id', ev.id);
+        // 2. Remove event history
         await supabase.from('event_history').delete().eq('event_id', ev.id);
+        // 3. Remove event record
         await supabase.from('events').delete().eq('id', ev.id);
-        localDb.permanentDeleteEvent(slug);
+
+        try {
+          localDb.permanentDeleteEvent(slug);
+        } catch (_) {}
+
         return true;
       }
     } catch (err) {
-      console.warn('Supabase permanentDeleteEvent error, falling back to local storage:', err);
+      console.error('Supabase permanentDeleteEvent error:', err);
     }
   }
 
@@ -329,18 +548,31 @@ export async function getTrashedEvents(): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('events')
-        .select('*, registrations(count)')
-        .eq('is_deleted', true)
-        .order('deleted_at', { ascending: false });
+        .select('*')
+        .filter('theme->>is_deleted', 'eq', 'true')
+        .order('updated_at', { ascending: false });
 
       if (!error && data) {
+        // Fetch registration counts
+        const { data: regs } = await supabase.from('registrations').select('event_id');
+        const regCounts: Record<string, number> = {};
+        if (regs) {
+          regs.forEach((r: any) => {
+            regCounts[r.event_id] = (regCounts[r.event_id] || 0) + 1;
+          });
+        }
+
         return data.map((ev: any) => ({
           ...ev,
-          registration_count: ev.registrations?.[0]?.count || 0,
+          start_date: ev.event_date || ev.start_date,
+          is_deleted: true,
+          deleted_at: ev.deleted_at || ev.theme?.deleted_at,
+          deleted_by: ev.deleted_by || ev.theme?.deleted_by,
+          registration_count: regCounts[ev.id] || 0,
         }));
       }
     } catch (err) {
-      console.warn('Supabase getTrashedEvents error, falling back to local storage:', err);
+      console.warn('Supabase getTrashedEvents error:', err);
     }
   }
 
@@ -348,7 +580,7 @@ export async function getTrashedEvents(): Promise<any[]> {
 }
 
 // ============================================================================
-// 3. REGISTRATIONS & DUPLICATE PREVENTION
+// 6. REGISTRATIONS & CAPACITY ENFORCEMENT
 // ============================================================================
 export async function registerForEvent(
   eventSlug: string,
@@ -366,10 +598,9 @@ export async function registerForEvent(
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
-      // Find event
       const { data: event, error: eventErr } = await supabase
         .from('events')
-        .select('id, title, registration_enabled, publication_status, is_deleted, maximum_participants, registration_deadline')
+        .select('id, title, registration_enabled, publication_status, maximum_participants, registration_deadline, theme')
         .eq('slug', eventSlug)
         .single();
 
@@ -377,7 +608,8 @@ export async function registerForEvent(
         return { success: false, error: 'Event not found.' };
       }
 
-      if (event.is_deleted) {
+      const isDeleted = event.theme?.is_deleted === true;
+      if (isDeleted) {
         return { success: false, error: 'This event is currently unavailable or removed.' };
       }
 
@@ -427,7 +659,7 @@ export async function registerForEvent(
         .from('registrations')
         .insert({
           event_id: event.id,
-          user_id: registrationData.user_id || null,
+          user_id: registrationData.user_id && registrationData.user_id.length === 36 ? registrationData.user_id : null,
           registration_number: regNumber,
           participant_name: registrationData.full_name.trim(),
           participant_email: normalizedEmail,
@@ -449,112 +681,230 @@ export async function registerForEvent(
             error: 'A registration with this email already exists for this event.',
           };
         }
-        throw regErr;
+        return { success: false, error: regErr.message || 'Registration failed.' };
       }
 
-      return { success: true, registration: reg };
+      // Record in event history
+      await supabase.from('event_history').insert({
+        event_id: event.id,
+        activity_type: 'REGISTERED',
+        activity_description: `Participant "${registrationData.full_name.trim()}" registered (${regNumber}).`,
+      });
+
+      return {
+        success: true,
+        registration: {
+          id: reg.id,
+          event_id: event.id,
+          event_title: event.title,
+          register_number: reg.registration_number,
+          registration_number: reg.registration_number,
+          full_name: reg.participant_name,
+          email: reg.participant_email,
+          department: reg.department,
+          year: reg.year_of_study,
+          contact_number: reg.phone_number,
+          created_at: reg.created_at,
+          registration_status: reg.registration_status,
+        },
+      };
     } catch (err: any) {
-      console.warn('Supabase register error, falling back to local storage:', err);
+      console.error('Supabase registerForEvent error:', err);
+      return { success: false, error: err.message || 'Registration failed.' };
     }
   }
 
-  // Fallback to local DB logic
-  try {
-    const existingEv = localDb.getEventBySlug(eventSlug);
-    if (!existingEv) return { success: false, error: 'Event not found.' };
-
-    const reg = localDb.registerUserForEvent({
-      event_id: existingEv.id,
-      full_name: registrationData.full_name,
-      email: registrationData.email,
-      register_number: registrationData.register_number,
-      department: registrationData.department,
-      year: registrationData.year,
-      contact_number: registrationData.contact_number,
-    });
-    return { success: true, registration: reg };
-  } catch (err: any) {
-    if (err.message && err.message.includes('Already registered')) {
-      return { success: false, alreadyRegistered: true, error: err.message };
-    }
-    return { success: false, error: err.message || 'Registration failed.' };
-  }
+  // Fallback to local DB
+  return localDb.registerUserForEvent({
+    event_id: eventSlug,
+    ...registrationData,
+  });
 }
 
-export async function getRegistrations(eventId?: string): Promise<any[]> {
+// ============================================================================
+// 7. ADMIN STATS & REPORTING
+// ============================================================================
+export async function getAdminStats(): Promise<{
+  total: number;
+  published: number;
+  drafts: number;
+  upcoming: number;
+  ongoing: number;
+  completed: number;
+  regEnabled: number;
+  regDisabled: number;
+  totalRegistrations: number;
+}> {
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
-      let query = supabase.from('registrations').select('*, events(title, slug)');
-      if (eventId && eventId !== 'all') {
-        query = query.eq('event_id', eventId);
+      const { data: events, error } = await supabase.from('events').select('*');
+      const { count: regCount } = await supabase
+        .from('registrations')
+        .select('*', { count: 'exact', head: true })
+        .neq('registration_status', 'cancelled');
+
+      if (!error && events) {
+        const activeEvents = events.filter((e: any) => e.theme?.is_deleted !== true && e.is_deleted !== true);
+        const total = activeEvents.length;
+        const published = activeEvents.filter((e: any) => e.publication_status === 'published').length;
+        const drafts = activeEvents.filter((e: any) => e.publication_status === 'draft' || e.publication_status === 'unpublished').length;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const upcoming = activeEvents.filter((e: any) => e.publication_status === 'published' && (e.event_date || e.start_date) > todayStr).length;
+        const ongoing = activeEvents.filter((e: any) => {
+          const start = e.event_date || e.start_date;
+          const end = e.end_date || start;
+          return e.publication_status === 'published' && start <= todayStr && end >= todayStr;
+        }).length;
+        const completed = activeEvents.filter((e: any) => {
+          const end = e.end_date || e.event_date || e.start_date;
+          return e.publication_status === 'published' && end < todayStr;
+        }).length;
+
+        const regEnabled = activeEvents.filter((e: any) => e.registration_enabled).length;
+        const regDisabled = activeEvents.filter((e: any) => !e.registration_enabled).length;
+
+        return {
+          total,
+          published,
+          drafts,
+          upcoming,
+          ongoing,
+          completed,
+          regEnabled,
+          regDisabled,
+          totalRegistrations: regCount || 0,
+        };
       }
-      query = query.order('created_at', { ascending: false });
-      const { data, error } = await query;
-      if (!error && data) return data;
     } catch (err) {
-      console.warn('Supabase getRegistrations error, falling back to local storage:', err);
+      console.warn('Supabase getAdminStats error, using local fallback:', err);
     }
   }
+
+  return localDb.getAdminStats();
+}
+
+export async function getAdminRegistrations(options: {
+  event_id?: string;
+  department?: string;
+  search?: string;
+} = {}): Promise<any[]> {
+  const supabase = getSupabaseServerClient(true);
+  if (supabase) {
+    try {
+      let query = supabase.from('registrations').select(`
+        id,
+        event_id,
+        registration_number,
+        participant_name,
+        participant_email,
+        department,
+        year_of_study,
+        phone_number,
+        college_name,
+        roll_number,
+        registration_status,
+        created_at
+      `).order('created_at', { ascending: false });
+
+      if (options.event_id && options.event_id !== 'all') {
+        query = query.eq('event_id', options.event_id);
+      }
+      if (options.department && options.department !== 'all') {
+        query = query.ilike('department', `%${options.department}%`);
+      }
+      if (options.search) {
+        query = query.or(`participant_name.ilike.%${options.search}%,participant_email.ilike.%${options.search}%,roll_number.ilike.%${options.search}%`);
+      }
+
+      const { data: regs, error: regErr } = await query;
+      if (!regErr && regs) {
+        // Fetch event titles
+        const { data: events } = await supabase.from('events').select('id, title, slug');
+        const eventMap: Record<string, { title: string; slug: string }> = {};
+        if (events) {
+          events.forEach((e: any) => {
+            eventMap[e.id] = { title: e.title, slug: e.slug };
+          });
+        }
+
+        return regs.map((r: any) => ({
+          id: r.id,
+          event_id: r.event_id,
+          event_title: eventMap[r.event_id]?.title || 'Unknown Event',
+          event_slug: eventMap[r.event_id]?.slug || '',
+          registration_number: r.registration_number,
+          register_number: r.roll_number || r.registration_number,
+          full_name: r.participant_name,
+          email: r.participant_email,
+          department: r.department,
+          year: r.year_of_study,
+          contact_number: r.phone_number,
+          college_name: r.college_name,
+          registration_status: r.registration_status,
+          created_at: r.created_at,
+        }));
+      }
+    } catch (err) {
+      console.warn('Supabase getAdminRegistrations error:', err);
+    }
+  }
+
+  // Fallback
   const db = localDb.getDatabase();
-  let list = [...db.event_registrations];
-  if (eventId && eventId !== 'all') {
-    list = list.filter((r) => r.event_id === eventId);
+  let registrations = [...db.event_registrations];
+
+  if (options.event_id && options.event_id !== 'all') {
+    registrations = registrations.filter((r) => r.event_id === options.event_id);
   }
-  return list;
+  if (options.department && options.department !== 'all') {
+    registrations = registrations.filter((r) =>
+      r.department.toLowerCase().includes((options.department || '').toLowerCase())
+    );
+  }
+  if (options.search) {
+    const q = options.search.toLowerCase();
+    registrations = registrations.filter(
+      (r) =>
+        r.full_name.toLowerCase().includes(q) ||
+        r.email.toLowerCase().includes(q) ||
+        r.register_number.toLowerCase().includes(q)
+    );
+  }
+
+  return registrations.map((r) => {
+    const event = db.events.find((e) => e.id === r.event_id);
+    return {
+      ...r,
+      event_title: event?.title || 'Unknown Event',
+      event_slug: event?.slug || '',
+    };
+  });
 }
 
 // ============================================================================
-// 4. EVENT ARCHIVES (AIML DEPARTMENT)
+// 8. AUDIT LOGGING
 // ============================================================================
-export async function getEventArchives(): Promise<EventArchive[]> {
-  const supabase = getSupabaseServerClient();
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('event_archives')
-        .select('*')
-        .order('original_serial_number', { ascending: true });
-      if (!error && data && data.length > 0) {
-        return data as EventArchive[];
-      }
-    } catch (err) {
-      console.warn('Supabase archives error, falling back to local storage:', err);
-    }
-  }
-  return localDb.getAllEventArchives();
-}
-
-export async function getEventArchiveBySlug(slug: string): Promise<EventArchive | null> {
-  const supabase = getSupabaseServerClient();
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('event_archives')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-      if (!error && data) return data as EventArchive;
-    } catch (err) {
-      console.warn('Supabase archive by slug error, falling back to local storage:', err);
-    }
-  }
-  return localDb.getEventArchiveBySlug(slug);
-}
-
-export async function logAdminAction(adminUserId: string, action: string, targetType: string, targetId?: string, metadata: any = {}) {
+export async function logAdminAction(
+  adminId: string,
+  action: string,
+  targetType: string,
+  targetId: string,
+  details: any = {}
+): Promise<void> {
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
       await supabase.from('admin_logs').insert({
-        admin_user_id: adminUserId.startsWith('admin-') ? null : adminUserId,
+        admin_id: adminId && adminId.length === 36 ? adminId : null,
         action,
         target_type: targetType,
-        target_id: targetId || null,
-        metadata,
+        target_id: targetId,
+        details,
       });
     } catch (err) {
-      console.warn('Failed to insert admin log in Supabase:', err);
+      console.warn('Supabase admin log error:', err);
     }
   }
 }

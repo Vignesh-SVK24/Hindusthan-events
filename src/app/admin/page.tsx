@@ -29,7 +29,9 @@ import {
   History,
   RotateCcw,
   ShieldAlert,
-  Key
+  Key,
+  Loader2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { EventItem, EventCategory, EventTheme, ThemePreset } from '@/lib/types';
 import { THEME_PRESETS } from '@/lib/themePresets';
@@ -47,6 +49,9 @@ export default function AdminPage() {
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Search & filter in Manage table
   const [manageSearch, setManageSearch] = useState('');
@@ -175,8 +180,29 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate size client-side (5MB max)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert(`File size exceeds 5MB limit (${(file.size / (1024 * 1024)).toFixed(2)} MB). Please select an image under 5MB.`);
+      e.target.value = '';
+      return;
+    }
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      alert('Invalid file format. Please select a JPG, JPEG, PNG, or WebP image.');
+      e.target.value = '';
+      return;
+    }
+
+    if (targetField === 'poster_url') setUploadingPoster(true);
+    else setUploadingCover(true);
+
     const body = new FormData();
     body.append('file', file);
+    body.append('type', targetField === 'poster_url' ? 'poster' : 'background');
+    body.append('slug', formData.slug || 'event');
 
     try {
       const res = await fetch('/api/upload', {
@@ -190,7 +216,15 @@ export default function AdminPage() {
       setFormData((prev) => ({ ...prev, [targetField]: data.url }));
     } catch (err: any) {
       alert(`Image upload error: ${err.message}`);
+    } finally {
+      if (targetField === 'poster_url') setUploadingPoster(false);
+      else setUploadingCover(false);
+      e.target.value = '';
     }
+  };
+
+  const handleRemoveImage = (targetField: 'poster_url' | 'cover_image_url') => {
+    setFormData((prev) => ({ ...prev, [targetField]: '' }));
   };
 
   const handleToggleRegistration = async (eventItem: EventItem) => {
@@ -389,6 +423,8 @@ export default function AdminPage() {
       return;
     }
 
+    setIsSaving(true);
+
     try {
       const url = editingEventId 
         ? `/api/events/${formData.slug}`
@@ -409,7 +445,7 @@ export default function AdminPage() {
         throw new Error(data.error || 'Failed to save event');
       }
 
-      setFormSuccess(editingEventId ? 'Event updated successfully!' : 'Event published successfully!');
+      setFormSuccess(editingEventId ? 'Event updated and saved to Supabase successfully!' : 'Event published and saved to Supabase successfully!');
       await loadAdminData();
 
       setTimeout(() => {
@@ -418,6 +454,8 @@ export default function AdminPage() {
       }, 1200);
     } catch (err: any) {
       setFormError(err.message || 'Operation failed');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1059,54 +1097,134 @@ export default function AdminPage() {
 
               {/* Section B: Media */}
               <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#C99A27] flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  <span>Section B — Event Images and Media</span>
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-[#C99A27] flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    <span>Section B — Event Images and Media (Supabase Storage)</span>
+                  </h3>
+                  <span className="text-[10px] text-[#77736A] font-semibold">JPG, PNG, WebP up to 5MB</span>
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-bold text-[#252525] mb-1">Main Event Poster</label>
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-24 h-32 rounded-2xl overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shrink-0">
-                        {formData.poster_url && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Poster Image */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-[#252525]">
+                      Event Poster Image *
+                    </label>
+                    <div className="flex gap-4 p-4 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4]">
+                      <div className="relative w-28 h-36 rounded-xl overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shrink-0 flex items-center justify-center">
+                        {uploadingPoster ? (
+                          <div className="flex flex-col items-center gap-1 text-[#C99A27]">
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                            <span className="text-[10px] font-bold">Uploading...</span>
+                          </div>
+                        ) : formData.poster_url ? (
                           <Image src={formData.poster_url} alt="Poster" fill className="object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-[#77736A] text-center p-2">
+                            <ImageIcon className="w-6 h-6" />
+                            <span className="text-[10px]">No Poster</span>
+                          </div>
                         )}
                       </div>
-                      <div className="space-y-2">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleImageUpload(e, 'poster_url')}
-                          className="text-xs text-[#77736A] file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#FFE99A] file:text-[#252525] hover:file:bg-[#E7B83F]"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Or paste poster image URL"
-                          value={formData.poster_url}
-                          onChange={(e) => setFormData({ ...formData, poster_url: e.target.value })}
-                          className="w-full px-3 py-1.5 rounded-full bg-[#FFFDF5] border border-[#F0E8D4] text-xs text-[#252525]"
-                        />
+
+                      <div className="flex-1 space-y-2.5">
+                        <label className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#FFE99A] hover:bg-[#E7B83F] text-[#252525] cursor-pointer shadow-sm transition-all">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>{formData.poster_url ? 'Replace Poster File' : 'Upload Poster File'}</span>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/jpg"
+                            onChange={(e) => handleImageUpload(e, 'poster_url')}
+                            className="hidden"
+                            disabled={uploadingPoster}
+                          />
+                        </label>
+
+                        {formData.poster_url && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage('poster_url')}
+                            className="block text-[11px] font-bold text-red-600 hover:text-red-700 underline"
+                          >
+                            Remove Poster
+                          </button>
+                        )}
+
+                        <div className="pt-1">
+                          <input
+                            type="text"
+                            placeholder="Or paste image URL"
+                            value={formData.poster_url}
+                            onChange={(e) => setFormData({ ...formData, poster_url: e.target.value })}
+                            className="w-full px-3 py-1.5 rounded-full bg-white border border-[#F0E8D4] text-xs text-[#252525] focus:outline-none focus:border-[#E7B83F]"
+                          />
+                        </div>
+                        <p className="text-[10px] text-[#77736A]">
+                          Stored securely in Supabase Storage (`event-media`).
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-[#252525] mb-1">Cover / Background Image</label>
-                    <div className="space-y-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, 'cover_image_url')}
-                        className="text-xs text-[#77736A] file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#FFF9E8] file:text-[#252525] border border-[#F0E8D4]"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Cover image URL"
-                        value={formData.cover_image_url}
-                        onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
-                        className="w-full px-3 py-1.5 rounded-full bg-[#FFFDF5] border border-[#F0E8D4] text-xs text-[#252525]"
-                      />
+                  {/* Cover / Background Image */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-[#252525]">
+                      Event Cover / Background Image
+                    </label>
+                    <div className="flex gap-4 p-4 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4]">
+                      <div className="relative w-36 h-24 rounded-xl overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shrink-0 flex items-center justify-center">
+                        {uploadingCover ? (
+                          <div className="flex flex-col items-center gap-1 text-[#C99A27]">
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                            <span className="text-[10px] font-bold">Uploading...</span>
+                          </div>
+                        ) : formData.cover_image_url ? (
+                          <Image src={formData.cover_image_url} alt="Cover" fill className="object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-[#77736A] text-center p-2">
+                            <ImageIcon className="w-6 h-6" />
+                            <span className="text-[10px]">No Cover</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 space-y-2.5">
+                        <label className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#FFF9E8] hover:bg-[#FFE99A] text-[#252525] cursor-pointer border border-[#F0E8D4] shadow-sm transition-all">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>{formData.cover_image_url ? 'Replace Cover File' : 'Upload Cover File'}</span>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/jpg"
+                            onChange={(e) => handleImageUpload(e, 'cover_image_url')}
+                            className="hidden"
+                            disabled={uploadingCover}
+                          />
+                        </label>
+
+                        {formData.cover_image_url && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage('cover_image_url')}
+                            className="block text-[11px] font-bold text-red-600 hover:text-red-700 underline"
+                          >
+                            Remove Cover
+                          </button>
+                        )}
+
+                        <div className="pt-1">
+                          <input
+                            type="text"
+                            placeholder="Or paste cover URL"
+                            value={formData.cover_image_url}
+                            onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
+                            className="w-full px-3 py-1.5 rounded-full bg-white border border-[#F0E8D4] text-xs text-[#252525] focus:outline-none focus:border-[#E7B83F]"
+                          />
+                        </div>
+                        <p className="text-[10px] text-[#77736A]">
+                          Wide banner for dynamic event header.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1347,9 +1465,11 @@ export default function AdminPage() {
 
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-full font-black text-sm text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] shadow-[0_4px_16px_rgba(231,184,63,0.3)] transition-all"
+                    disabled={isSaving}
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-full font-black text-sm text-[#252525] bg-[#FFE99A] hover:bg-[#E7B83F] shadow-[0_4px_16px_rgba(231,184,63,0.3)] transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2"
                   >
-                    {editingEventId ? 'Save Changes' : 'Publish College Event'}
+                    {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                    <span>{editingEventId ? (isSaving ? 'Saving Changes...' : 'Save Changes') : (isSaving ? 'Publishing Event...' : 'Publish College Event')}</span>
                   </button>
                 </div>
               </div>

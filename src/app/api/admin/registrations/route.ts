@@ -1,69 +1,42 @@
 import { NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
+import { getAdminRegistrations } from '@/lib/supabase/dbAdapter';
+import { getCurrentUser, isDeveloperUser } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || (user.role !== 'admin' && user.role !== 'developer')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    if (!user || (user.role !== 'admin' && user.role !== 'developer' && !isDeveloperUser(user))) {
+      return NextResponse.json({ error: 'Unauthorized: Admin or Developer role required' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
-    const event_id = searchParams.get('event_id');
-    const department = searchParams.get('department');
-    const search = searchParams.get('search');
+    const event_id = searchParams.get('event_id') || undefined;
+    const department = searchParams.get('department') || undefined;
+    const search = searchParams.get('search') || undefined;
     const format = searchParams.get('format');
 
-    const db = getDatabase();
-    let registrations = [...db.event_registrations];
-
-    if (event_id && event_id !== 'all') {
-      registrations = registrations.filter((r) => r.event_id === event_id);
-    }
-
-    if (department && department !== 'all') {
-      registrations = registrations.filter((r) =>
-        r.department.toLowerCase().includes(department.toLowerCase())
-      );
-    }
-
-    if (search) {
-      const q = search.toLowerCase();
-      registrations = registrations.filter(
-        (r) =>
-          r.full_name.toLowerCase().includes(q) ||
-          r.email.toLowerCase().includes(q) ||
-          r.register_number.toLowerCase().includes(q)
-      );
-    }
-
-    // Attach event title
-    const enriched = registrations.map((r) => {
-      const event = db.events.find((e) => e.id === r.event_id);
-      return {
-        ...r,
-        event_title: event?.title || 'Unknown Event',
-        event_slug: event?.slug || '',
-      };
+    const enriched = await getAdminRegistrations({
+      event_id,
+      department,
+      search,
     });
 
     if (format === 'csv') {
       const headers = ['ID', 'Event Title', 'Student Name', 'Email', 'Register Number', 'Department', 'Year', 'Contact', 'Status', 'Registered At'];
-      const rows = enriched.map((r) => [
+      const rows = enriched.map((r: any) => [
         r.id,
-        `"${r.event_title.replace(/"/g, '""')}"`,
-        `"${r.full_name.replace(/"/g, '""')}"`,
+        `"${(r.event_title || '').replace(/"/g, '""')}"`,
+        `"${(r.full_name || '').replace(/"/g, '""')}"`,
         r.email,
         r.register_number,
-        `"${r.department.replace(/"/g, '""')}"`,
+        `"${(r.department || '').replace(/"/g, '""')}"`,
         r.year,
         r.contact_number,
         r.registration_status,
         r.created_at,
       ]);
 
-      const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+      const csvContent = [headers.join(','), ...rows.map((row: any) => row.join(','))].join('\n');
       return new Response(csvContent, {
         headers: {
           'Content-Type': 'text/csv',
