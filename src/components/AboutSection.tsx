@@ -123,10 +123,6 @@ export default function AboutSection() {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 text-xs w-full md:w-auto">
-            <div className="px-4 py-2.5 rounded-2xl bg-[#FFFDF5] border border-[#F0E8D4] w-full sm:w-auto text-center sm:text-left">
-              <span className="text-[#77736A] font-medium mr-1.5">Organized by:</span>
-              <span className="font-bold text-[#252525]">Department of Artificial Intelligence and Machine Learning (AIML)</span>
-            </div>
             <div className="px-4 py-2.5 rounded-2xl bg-[#FFF0B3]/50 border border-[#FFE99A] text-[#252525] w-full sm:w-auto text-center sm:text-left shadow-xs">
               <span className="font-black text-[#C99A27]">Website Developed and managed by Vignesh S - AIML</span>
             </div>
