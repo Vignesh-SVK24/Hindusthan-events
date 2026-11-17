@@ -263,8 +263,8 @@ export function createEmailOtp(email: string): {
   const now = Date.now();
 
   const existing = otpStore.get(normalizedEmail);
-  if (existing && now - existing.lastRequestedAt < 30 * 1000) {
-    const cooldown = Math.ceil((30 * 1000 - (now - existing.lastRequestedAt)) / 1000);
+  if (existing && now - existing.lastRequestedAt < 60 * 1000) {
+    const cooldown = Math.ceil((60 * 1000 - (now - existing.lastRequestedAt)) / 1000);
     return {
       success: false,
       error: `Please wait ${cooldown} seconds before requesting a new code.`,
@@ -273,7 +273,7 @@ export function createEmailOtp(email: string): {
   }
 
   const code = generateNumericOtp();
-  const expiresAt = now + 10 * 60 * 1000; // 10 minutes expiry
+  const expiresAt = now + 5 * 60 * 1000; // 5 minutes expiry
 
   otpStore.set(normalizedEmail, {
     code,
@@ -282,8 +282,8 @@ export function createEmailOtp(email: string): {
     lastRequestedAt: now,
   });
 
-  // Securely log OTP generation on server
-  console.log(`[HICET Auth OTP] Generated 6-digit code for ${normalizedEmail}: ${code} (expires in 10 minutes)`);
+  // Diagnostic log without recording OTP secrets
+  console.log(`[HICET Auth OTP] Verification request initialized for ${normalizedEmail} (valid for 5 minutes).`);
 
   return {
     success: true,

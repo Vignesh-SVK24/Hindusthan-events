@@ -34,13 +34,12 @@ export async function POST(request: Request) {
 
     resetRateLimit(ip);
 
-    // Return success. demoOtp is provided for frictionless test/demo evaluation
+    // Return clean confirmation without exposing OTP value
     return NextResponse.json({
       success: true,
-      message: `A 6-digit verification code has been generated for ${email.trim().toLowerCase()}.`,
+      message: `A 6-digit verification code has been dispatched to ${email.trim().toLowerCase()}.`,
       email: email.trim().toLowerCase(),
-      expiresAt: otpResult.expiresAt,
-      demoOtp: otpResult.otp,
+      expiresInMinutes: 5,
     });
   } catch (err) {
     console.error('Error generating email OTP:', err);

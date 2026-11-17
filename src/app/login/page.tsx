@@ -47,7 +47,6 @@ export default function UnifiedLoginPage() {
   const [email, setEmail] = useState('');
   const [otpStep, setOtpStep] = useState<'email' | 'otp'>('email');
   const [otpCode, setOtpCode] = useState('');
-  const [demoCodeHint, setDemoCodeHint] = useState<string | null>(null);
   const [otpCountdown, setOtpCountdown] = useState(0);
 
   // Admin Flow States (Username/Email + Password)
@@ -101,11 +100,8 @@ export default function UnifiedLoginPage() {
       }
 
       setOtpStep('otp');
-      setOtpCountdown(30);
-      setSuccessMessage(`Verification code sent to ${email.trim().toLowerCase()}`);
-      if (res.demoOtp) {
-        setDemoCodeHint(res.demoOtp);
-      }
+      setOtpCountdown(60);
+      setSuccessMessage(`A 6-digit verification code has been dispatched to ${email.trim().toLowerCase()}.`);
     } catch {
       setError('A connection error occurred. Please verify your network and try again.');
     } finally {
@@ -127,20 +123,22 @@ export default function UnifiedLoginPage() {
     try {
       const res = await verifyEmailOtp(email.trim(), otpCode.trim());
       if (!res.success) {
-        setError(res.error || 'Invalid verification code. Please check and try again.');
+        setError(res.error || 'Invalid or expired verification code. Please check and try again.');
+        setOtpCode(''); // Clear OTP input on failure as required
         return;
       }
 
       // Normal users are redirected to the public homepage
       router.push('/');
     } catch {
-      setError('A network error occurred. Please try again.');
+      setError('A network error occurred during verification. Please try again.');
+      setOtpCode('');
     } finally {
       setLoading(false);
     }
   };
 
-  // Resend OTP
+  // Resend OTP (with 60s minimum cooldown)
   const handleResendOtp = async () => {
     if (otpCountdown > 0) return;
     setError(null);
@@ -148,13 +146,11 @@ export default function UnifiedLoginPage() {
     try {
       const res = await sendEmailOtp(email.trim());
       if (!res.success) {
-        setError(res.error || 'Could not resend code.');
+        setError(res.error || 'Could not dispatch a new code.');
       } else {
-        setOtpCountdown(30);
-        setSuccessMessage('A new 6-digit code has been generated.');
-        if (res.demoOtp) {
-          setDemoCodeHint(res.demoOtp);
-        }
+        setOtpCountdown(60);
+        setSuccessMessage(`A fresh 6-digit code has been dispatched to ${email.trim().toLowerCase()}.`);
+        setOtpCode('');
       }
     } finally {
       setLoading(false);
@@ -567,10 +563,10 @@ export default function UnifiedLoginPage() {
                       ) : (
                         /* Step 2: 6-Digit OTP Verification Form */
                         <form onSubmit={handleVerifyOtp} className="space-y-4">
-                          <div className="rounded-2xl bg-[#FFFDF5] border border-[#FFE99A] p-3.5 space-y-2">
+                          <div className="rounded-2xl bg-[#FFFDF5] border border-[#FFE99A] p-4 space-y-3">
                             <div className="flex items-center justify-between">
                               <span className="text-xs font-bold text-[#252525]">
-                                Enter 6-Digit Code
+                                Enter 6-Digit Verification Code
                               </span>
                               <button
                                 type="button"
@@ -578,12 +574,17 @@ export default function UnifiedLoginPage() {
                                   setOtpStep('email');
                                   setError(null);
                                   setSuccessMessage(null);
+                                  setOtpCode('');
                                 }}
                                 className="text-[11px] font-bold text-[#C99A27] hover:underline"
                               >
                                 Change Email
                               </button>
                             </div>
+
+                            <p className="text-[11px] text-[#77736A] leading-relaxed">
+                              Sent to <strong className="text-[#252525]">{email.trim().toLowerCase()}</strong>. Please check your inbox and spam folder. Valid for 5 minutes.
+                            </p>
 
                             <div className="relative">
                               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#77736A]">
@@ -599,24 +600,17 @@ export default function UnifiedLoginPage() {
                                 required
                                 placeholder="• • • • • •"
                                 value={otpCode}
-                                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                                className="w-full pl-10 pr-4 py-3 sm:py-3.5 rounded-xl bg-white border border-[#F0E8D4] text-[#252525] text-lg font-mono tracking-widest text-center focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 transition-all placeholder:text-[#77736A]/40"
+                                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                onPaste={(e) => {
+                                  const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                                  if (text) {
+                                    e.preventDefault();
+                                    setOtpCode(text);
+                                  }
+                                }}
+                                className="w-full pl-10 pr-4 py-3 sm:py-3.5 rounded-xl bg-white border border-[#F0E8D4] text-[#252525] text-xl font-mono tracking-[0.35em] text-center focus:outline-none focus:border-[#E7B83F] focus:ring-2 focus:ring-[#FFE99A]/50 transition-all placeholder:text-[#77736A]/40"
                               />
                             </div>
-
-                            {/* Demo Code Auto-Fill Pill for Frictionless Evaluation */}
-                            {demoCodeHint && (
-                              <div className="flex items-center justify-between pt-1 px-1 text-[11px] text-[#77736A]">
-                                <span>Demo Code: <strong className="text-[#252525]">{demoCodeHint}</strong></span>
-                                <button
-                                  type="button"
-                                  onClick={() => setOtpCode(demoCodeHint)}
-                                  className="text-[10px] font-black uppercase text-[#C99A27] bg-white px-2 py-0.5 rounded-full border border-[#FFE99A] hover:bg-[#FFE99A]"
-                                >
-                                  Auto-Fill
-                                </button>
-                              </div>
-                            )}
                           </div>
 
                           <button
@@ -627,7 +621,7 @@ export default function UnifiedLoginPage() {
                             {loading ? (
                               <>
                                 <Loader2 className="w-4 h-4 animate-spin text-[#252525]" />
-                                <span>Verifying Code...</span>
+                                <span>Verifying with Supabase Auth...</span>
                               </>
                             ) : (
                               <span>Verify & Enter Homepage →</span>
@@ -639,7 +633,7 @@ export default function UnifiedLoginPage() {
                               type="button"
                               onClick={handleResendOtp}
                               disabled={otpCountdown > 0 || loading}
-                              className="text-xs font-semibold text-[#77736A] hover:text-[#252525] disabled:opacity-50 inline-flex items-center gap-1.5"
+                              className="text-xs font-semibold text-[#77736A] hover:text-[#252525] disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer"
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
                               <span>
