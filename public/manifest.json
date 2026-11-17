@@ -1,6 +1,26 @@
 {
-  "name": "HiCET Events Hub",
+  "name": "Hindusthan College of Engineering and Technology Events Hub",
   "short_name": "HiCET Events",
+  "description": "Central Campus Event Discovery & Registration Platform",
   "start_url": "/",
-  "display": "browser"
+  "display": "browser",
+  "theme_color": "#FFFDF5",
+  "background_color": "#FFFDF5",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
 }
