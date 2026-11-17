@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getDatabase, saveDatabase } from '@/lib/db';
+import { getCategories } from '@/lib/supabase/dbAdapter';
 import { getCurrentUser } from '@/lib/auth';
+import { getDatabase, saveDatabase } from '@/lib/db';
 import { EventCategory } from '@/lib/types';
 
 export async function GET() {
-  const db = getDatabase();
-  return NextResponse.json({ categories: db.event_categories });
+  const categories = await getCategories();
+  return NextResponse.json({ categories });
 }
 
 export async function POST(request: Request) {

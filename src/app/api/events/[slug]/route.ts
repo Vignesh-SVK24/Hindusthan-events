@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getEventBySlug, updateEvent, deleteEvent } from '@/lib/db';
+import { getEventBySlug, updateEvent, deleteEvent, logAdminAction } from '@/lib/supabase/dbAdapter';
 import { getCurrentUser } from '@/lib/auth';
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const slug = params.slug;
-    const event = getEventBySlug(slug);
+    const event = await getEventBySlug(slug);
 
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -31,7 +31,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized: Admin privileges required' }, { status: 403 });
     }
 
-    const currentEvent = getEventBySlug(params.slug);
+    const currentEvent = await getEventBySlug(params.slug);
     if (!currentEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
@@ -39,10 +39,12 @@ export async function PUT(
     const body = await request.json();
     const { eventData, themeData } = body;
 
-    const updated = updateEvent(currentEvent.id, eventData, themeData);
+    const updated = await updateEvent(params.slug, eventData, themeData);
     if (!updated) {
       return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
     }
+
+    await logAdminAction(user.id, 'UPDATE_EVENT', 'events', currentEvent.id, { slug: params.slug });
 
     return NextResponse.json({ success: true, event: updated });
   } catch (error) {
@@ -61,12 +63,16 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized: Admin privileges required' }, { status: 403 });
     }
 
-    const currentEvent = getEventBySlug(params.slug);
+    const currentEvent = await getEventBySlug(params.slug);
     if (!currentEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
-    const success = deleteEvent(currentEvent.id);
+    const success = await deleteEvent(params.slug);
+    if (success) {
+      await logAdminAction(user.id, 'DELETE_EVENT', 'events', currentEvent.id, { slug: params.slug });
+    }
+
     return NextResponse.json({ success });
   } catch (error) {
     console.error('Error deleting event:', error);

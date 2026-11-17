@@ -28,7 +28,7 @@ import LogoIntro from '@/components/LogoIntro';
 
 export default function UnifiedLoginPage() {
   const router = useRouter();
-  const { user, isAdmin, isUser, loginAdmin, sendEmailOtp, verifyEmailOtp, logout } = useAuth();
+  const { user, isAdmin, isUser, loginAdmin, loginWithGoogle, sendEmailOtp, verifyEmailOtp, logout } = useAuth();
 
   // Intro animation state: Show if visitor hasn't seen intro this session
   const [showIntro, setShowIntro] = useState(false);
@@ -71,11 +71,15 @@ export default function UnifiedLoginPage() {
   }, [otpCountdown]);
 
   // Handle Google Sign-In redirect
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setError(null);
     setGoogleLoading(true);
-    // Redirects to real Google OAuth endpoint or demo callback
-    window.location.href = '/api/auth/google';
+    try {
+      await loginWithGoogle();
+    } catch {
+      setError('Could not connect to Google authentication provider.');
+      setGoogleLoading(false);
+    }
   };
 
   // Step 1: Send Passwordless Email OTP

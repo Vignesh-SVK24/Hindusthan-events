@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:supabase": "node scripts/seed_supabase.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "framer-motion": "^14.9.0",

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getEventBySlug, registerUserForEvent, getDatabase } from '@/lib/db';
+import { getEventBySlug, registerForEvent } from '@/lib/supabase/dbAdapter';
 
 export async function GET(
   request: Request,
@@ -14,22 +14,32 @@ export async function GET(
       return NextResponse.json({ registered: false, registration: null });
     }
 
-    const event = getEventBySlug(params.slug);
+    const event = await getEventBySlug(params.slug);
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
-    const db = getDatabase();
-    const reg = db.event_registrations.find(
-      (r) =>
-        r.event_id === event.id &&
-        ((email && r.email.toLowerCase() === email.toLowerCase().trim()) ||
-          (register_number && r.register_number.toLowerCase() === register_number.toLowerCase().trim()))
-    );
+    // In local or Supabase mode, check existing registration
+    const result = await registerForEvent(params.slug, {
+      full_name: '',
+      email: email || '',
+      register_number: register_number || '',
+      department: '',
+      year: '',
+      contact_number: '',
+    });
+
+    if (result.alreadyRegistered) {
+      return NextResponse.json({
+        registered: true,
+        registration: result.registration || null,
+        message: result.error,
+      });
+    }
 
     return NextResponse.json({
-      registered: !!reg,
-      registration: reg || null,
+      registered: false,
+      registration: null,
     });
   } catch (error) {
     console.error('Error checking registration status:', error);
@@ -42,7 +52,7 @@ export async function POST(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const event = getEventBySlug(params.slug);
+    const event = await getEventBySlug(params.slug);
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
@@ -56,7 +66,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { full_name, email, register_number, department, year, contact_number } = body;
+    const { full_name, email, register_number, department, year, contact_number, user_id } = body;
 
     // Server-side validation
     if (!full_name || typeof full_name !== 'string' || full_name.trim().length < 2) {
@@ -75,23 +85,23 @@ export async function POST(
       return NextResponse.json({ error: 'Department name is required.' }, { status: 400 });
     }
 
-    const result = registerUserForEvent({
-      event_id: event.id,
+    const result = await registerForEvent(params.slug, {
       full_name: full_name.trim(),
       email: email.trim().toLowerCase(),
       register_number: register_number.trim().toUpperCase(),
       department: department.trim(),
       year: year || '1st Year',
       contact_number: contact_number?.trim() || '',
+      user_id,
     });
 
     if (!result.success) {
-      return NextResponse.json({ error: result.message }, { status: 400 });
+      return NextResponse.json({ error: result.error }, { status: result.alreadyRegistered ? 409 : 400 });
     }
 
     return NextResponse.json({
       success: true,
-      message: result.message,
+      message: 'Registration confirmed successfully!',
       registration: result.registration,
     });
   } catch (error) {
