@@ -7,27 +7,13 @@ import Image from 'next/image';
 interface LogoIntroProps {
   onComplete?: () => void;
   forceShow?: boolean;
-  disabled?: boolean;
 }
 
-export default function LogoIntro({ onComplete, forceShow = false, disabled = false }: LogoIntroProps) {
-  const [show, setShow] = useState<boolean>(() => {
-    if (disabled && !forceShow) return false;
-    if (typeof window !== 'undefined' && !forceShow) {
-      const viewed = sessionStorage.getItem('hindusthan_intro_viewed');
-      return !viewed;
-    }
-    return !disabled || forceShow;
-  });
+export default function LogoIntro({ onComplete, forceShow = false }: LogoIntroProps) {
+  const [show, setShow] = useState(false);
   const [stage, setStage] = useState<'initial' | 'zooming' | 'fadeout'>('initial');
 
   useEffect(() => {
-    if (disabled && !forceShow) {
-      setShow(false);
-      onComplete?.();
-      return;
-    }
-
     if (!forceShow) {
       const viewed = sessionStorage.getItem('hindusthan_intro_viewed');
       if (viewed) {
@@ -57,7 +43,7 @@ export default function LogoIntro({ onComplete, forceShow = false, disabled = fa
       clearTimeout(timer2);
       clearTimeout(timer3);
     };
-  }, [forceShow, disabled, onComplete]);
+  }, [forceShow, onComplete]);
 
   const handleSkip = () => {
     setShow(false);
@@ -75,7 +61,7 @@ export default function LogoIntro({ onComplete, forceShow = false, disabled = fa
         animate={{ opacity: stage === 'fadeout' ? 0 : 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#FFFDF5] overflow-hidden select-none pointer-events-auto"
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FFFDF5] overflow-hidden select-none pointer-events-auto"
       >
         {/* Spatial Warm Ambient Radial Lighting */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#FFF0B3]/40 via-[#FFF9E8]/80 to-[#FFFDF5] pointer-events-none" />
