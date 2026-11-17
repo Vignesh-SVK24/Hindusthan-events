@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import EventDiscovery from '@/components/EventDiscovery';
@@ -11,10 +13,26 @@ import LogoIntro from '@/components/LogoIntro';
 import { EventItem, EventCategory, EventTheme } from '@/lib/types';
 
 export default function HomePage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
+
   const [events, setEvents] = useState<(EventItem & { category?: EventCategory; theme?: EventTheme; registration_count?: number })[]>([]);
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [replayIntro, setReplayIntro] = useState(false);
+
+  // Check initial entry sequence:
+  // If visitor is unauthenticated, the intro plays first and transitions to /login,
+  // making /login the default landing experience for unauthenticated users.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const viewed = typeof window !== 'undefined' ? sessionStorage.getItem('hindusthan_intro_viewed') : null;
+      if (viewed) {
+        // If intro was already seen in this session, go directly to login
+        router.push('/login');
+      }
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     async function loadData() {
@@ -39,14 +57,26 @@ export default function HomePage() {
     loadData();
   }, []);
 
+  const handleIntroComplete = () => {
+    setReplayIntro(false);
+    sessionStorage.setItem('hindusthan_intro_viewed', 'true');
+    // If not authenticated, smoothly transition to /login upon intro completion
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  };
+
   const featuredEvent = events[0];
 
   return (
     <main className="min-h-screen bg-[#FFFDF5] text-[#252525] flex flex-col selection:bg-[#FFE99A] selection:text-[#252525]">
       {/* Opening Animated College Logo Zoom-Out Intro */}
-      <LogoIntro forceShow={replayIntro} onComplete={() => setReplayIntro(false)} />
+      <LogoIntro
+        forceShow={replayIntro}
+        onComplete={handleIntroComplete}
+      />
 
-      {/* Spatial Floating Navbar */}
+      {/* Spatial Floating Navbar with Account Profile Dropdown */}
       <Navbar onReplayIntro={() => setReplayIntro(true)} />
 
       {/* Spatial Hero Section */}

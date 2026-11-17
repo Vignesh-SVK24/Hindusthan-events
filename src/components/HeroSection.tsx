@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Sparkles, Calendar, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { EventItem } from '@/lib/types';
+import { useAuth } from '@/context/AuthContext';
 
 interface HeroSectionProps {
   featuredEvent?: EventItem;
@@ -13,6 +14,8 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ featuredEvent, totalEventsCount }: HeroSectionProps) {
+  const { isAdmin } = useAuth();
+
   return (
     <section className="relative overflow-hidden pt-8 sm:pt-12 pb-16 sm:pb-20">
       {/* Soft Yellow Spatial Ambient Light Gradients */}
@@ -78,13 +81,23 @@ export default function HeroSection({ featuredEvent, totalEventsCount }: HeroSec
                 <ArrowRight className="w-4 h-4" />
               </a>
 
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full font-bold text-sm text-[#252525] bg-white hover:bg-[#FFF9E8] border border-[#F0E8D4] hover:border-[#E7B83F] shadow-spatial transition-all transform hover:-translate-y-0.5"
-              >
-                <ShieldCheck className="w-4 h-4 text-[#C99A27]" />
-                <span>Admin Event Studio</span>
-              </Link>
+              {isAdmin ? (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full font-bold text-sm text-[#252525] bg-white hover:bg-[#FFF9E8] border border-[#F0E8D4] hover:border-[#E7B83F] shadow-spatial transition-all transform hover:-translate-y-0.5"
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#C99A27]" />
+                  <span>Admin Event Studio</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/event-archives"
+                  className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full font-bold text-sm text-[#252525] bg-white hover:bg-[#FFF9E8] border border-[#F0E8D4] hover:border-[#E7B83F] shadow-spatial transition-all transform hover:-translate-y-0.5"
+                >
+                  <Sparkles className="w-4 h-4 text-[#C99A27]" />
+                  <span>AIML Archives & Records</span>
+                </Link>
+              )}
             </motion.div>
 
             {/* Micro Highlights Pill Panels */}

@@ -5,7 +5,8 @@ import {
   checkRateLimit,
   recordFailedAttempt,
   resetRateLimit,
-  SESSION_COOKIE,
+  ADMIN_SESSION_COOKIE,
+  USER_SESSION_COOKIE,
 } from '@/lib/auth';
 
 export async function POST(request: Request) {
@@ -29,14 +30,14 @@ export async function POST(request: Request) {
 
     if (!password || typeof password !== 'string') {
       recordFailedAttempt(ip);
-      return NextResponse.json({ error: 'Password is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Password is required.' }, { status: 400 });
     }
 
     const isValid = verifyAdminPassword(password);
     if (!isValid) {
       recordFailedAttempt(ip);
       return NextResponse.json(
-        { error: 'Invalid administrator password.' },
+        { error: 'Invalid administrator credentials. Please check your password.' },
         { status: 401 }
       );
     }
@@ -54,17 +55,29 @@ export async function POST(request: Request) {
         id: 'admin-root',
         role: 'admin',
         full_name: 'Administrator',
+        email: 'admin@hindusthan.net',
       },
     });
 
     response.cookies.set({
-      name: SESSION_COOKIE,
+      name: ADMIN_SESSION_COOKIE,
       value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60, // 7 days session
+    });
+
+    // Clear any normal user session to avoid role ambiguity
+    response.cookies.set({
+      name: USER_SESSION_COOKIE,
+      value: '',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 0,
     });
 
     return response;

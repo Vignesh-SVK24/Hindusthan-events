@@ -3,9 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { ShieldCheck, LogIn } from 'lucide-react';
 
 export default function Footer() {
+  const { user, isAdmin } = useAuth();
+
   return (
     <footer className="border-t border-[#F0E8D4] bg-white text-[#77736A] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
@@ -41,10 +44,17 @@ export default function Footer() {
           <a href="/#about-section" className="hover:text-[#C99A27] transition-colors">
             Campus Infrastructure
           </a>
-          <Link href="/admin" className="text-[#C99A27] hover:text-[#B38318] font-black flex items-center gap-1.5 transition-colors">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Admin Portal
-          </Link>
+          {isAdmin ? (
+            <Link href="/admin" className="text-[#C99A27] hover:text-[#B38318] font-black flex items-center gap-1.5 transition-colors">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Admin Portal
+            </Link>
+          ) : (
+            <Link href="/login" className="hover:text-[#C99A27] transition-colors flex items-center gap-1.5">
+              <LogIn className="w-3.5 h-3.5" />
+              {user ? 'My Account' : 'Portal Sign In'}
+            </Link>
+          )}
         </div>
 
         {/* Spatial UI Badge */}
