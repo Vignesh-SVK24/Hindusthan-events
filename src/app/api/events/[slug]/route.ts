@@ -27,11 +27,11 @@ export async function PUT(
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'developer')) {
       return NextResponse.json({ error: 'Unauthorized: Admin privileges required' }, { status: 403 });
     }
 
-    const currentEvent = await getEventBySlug(params.slug);
+    const currentEvent = await getEventBySlug(params.slug, { includeDeleted: true });
     if (!currentEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
@@ -59,21 +59,21 @@ export async function DELETE(
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'developer')) {
       return NextResponse.json({ error: 'Unauthorized: Admin privileges required' }, { status: 403 });
     }
 
-    const currentEvent = await getEventBySlug(params.slug);
+    const currentEvent = await getEventBySlug(params.slug, { includeDeleted: true });
     if (!currentEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
-    const success = await deleteEvent(params.slug);
+    const success = await deleteEvent(params.slug, user.id);
     if (success) {
-      await logAdminAction(user.id, 'DELETE_EVENT', 'events', currentEvent.id, { slug: params.slug });
+      await logAdminAction(user.id, 'MOVE_TO_TRASH', 'events', currentEvent.id, { slug: params.slug, title: currentEvent.title });
     }
 
-    return NextResponse.json({ success });
+    return NextResponse.json({ success, message: 'Event successfully moved to trash.' });
   } catch (error) {
     console.error('Error deleting event:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

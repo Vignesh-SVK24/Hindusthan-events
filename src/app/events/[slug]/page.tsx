@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getEventBySlug } from '@/lib/db';
+import { getEventBySlug } from '@/lib/supabase/dbAdapter';
 import EventPageClient from './EventPageClient';
 import type { Metadata } from 'next';
 
@@ -9,8 +9,8 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const event = getEventBySlug(params.slug);
-  if (!event) {
+  const event = await getEventBySlug(params.slug);
+  if (!event || event.is_deleted) {
     return { title: 'Event Not Found | Hindusthan Events Hub' };
   }
 
@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function EventPage({ params }: Props) {
-  const event = getEventBySlug(params.slug);
+export default async function EventPage({ params }: Props) {
+  const event = await getEventBySlug(params.slug);
 
-  if (!event) {
+  if (!event || event.is_deleted) {
     notFound();
   }
 

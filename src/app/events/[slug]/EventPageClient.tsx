@@ -215,17 +215,47 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
                 {event.category?.category_name || 'College Event'}
               </span>
 
-              {event.registration_enabled ? (
-                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 rounded-full shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  Registration Open
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold text-rose-800 bg-rose-100/90 border border-rose-300 rounded-full shadow-sm">
-                  <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                  Registration Closed
-                </span>
-              )}
+              {(() => {
+                const isFull = event.maximum_participants ? (event.registration_count || 0) >= event.maximum_participants : false;
+                const isExpired = event.registration_deadline ? new Date() > new Date(event.registration_deadline) : false;
+                const isOpen = event.registration_enabled && !isFull && !isExpired;
+
+                if (isFull) {
+                  return (
+                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold text-amber-800 bg-amber-100/90 border border-amber-300 rounded-full shadow-sm">
+                      <Users className="w-3.5 h-3.5 text-amber-600" />
+                      Capacity Full ({event.registration_count}/{event.maximum_participants})
+                    </span>
+                  );
+                }
+                if (isExpired) {
+                  return (
+                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold text-rose-800 bg-rose-100/90 border border-rose-300 rounded-full shadow-sm">
+                      <Clock className="w-3.5 h-3.5 text-rose-600" />
+                      Registration Expired
+                    </span>
+                  );
+                }
+                if (isOpen) {
+                  return (
+                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 rounded-full shadow-sm">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                      Registration Open
+                      {event.maximum_participants && (
+                        <span className="ml-1 text-[11px] font-medium text-emerald-700">
+                          ({Math.max(0, event.maximum_participants - (event.registration_count || 0))} seats left)
+                        </span>
+                      )}
+                    </span>
+                  );
+                }
+                return (
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold text-rose-800 bg-rose-100/90 border border-rose-300 rounded-full shadow-sm">
+                    <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                    Registration Closed
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Event Title */}
@@ -313,36 +343,80 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
 
             {/* PRIMARY REGISTRATION ACTION BAR */}
             <div className="pt-2">
-              {event.registration_enabled ? (
-                isRegistered ? (
-                  /* Confirmed Digital Ticket Pass */
-                  <div className="p-6 rounded-3xl bg-[#FFF9E8] border-2 border-emerald-400 shadow-spatial space-y-4">
-                    <div className="flex items-center gap-2.5 text-emerald-800 font-black text-sm">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                      <span>You are successfully registered for this event!</span>
-                    </div>
-                    <p className="text-xs text-[#77736A] leading-relaxed">
-                      Your digital pass is confirmed. Present the verification QR code at the check-in reception desk on arrival.
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center gap-4 pt-1 bg-white p-4 rounded-2xl border border-[#F0E8D4]">
-                      {qrCodeUrl && (
-                        <div className="bg-white p-2 rounded-xl shadow-sm border border-[#F0E8D4] shrink-0">
-                          <Image src={qrCodeUrl} alt="QR Pass" width={90} height={90} className="rounded" />
-                        </div>
-                      )}
-                      <div className="space-y-1 text-xs text-center sm:text-left">
-                        <p className="font-mono font-bold text-[#252525]">Ticket Ref: #{registrationData?.id.slice(-8).toUpperCase()}</p>
-                        <p className="text-[#77736A]">Reg No: {registrationData?.register_number}</p>
-                        <p className="text-[#77736A]">Student: {registrationData?.full_name}</p>
-                        <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-[11px] pt-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Digital Pass Verified & Active</span>
-                        </span>
+              {isRegistered ? (
+                /* Confirmed Digital Ticket Pass */
+                <div className="p-6 rounded-3xl bg-[#FFF9E8] border-2 border-emerald-400 shadow-spatial space-y-4">
+                  <div className="flex items-center gap-2.5 text-emerald-800 font-black text-sm">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span>You are successfully registered for this event!</span>
+                  </div>
+                  <p className="text-xs text-[#77736A] leading-relaxed">
+                    Your digital pass is confirmed. Present the verification QR code at the check-in reception desk on arrival.
+                  </p>
+                  <div className="flex flex-col sm:flex-row items-center gap-4 pt-1 bg-white p-4 rounded-2xl border border-[#F0E8D4]">
+                    {qrCodeUrl && (
+                      <div className="bg-white p-2 rounded-xl shadow-sm border border-[#F0E8D4] shrink-0">
+                        <Image src={qrCodeUrl} alt="QR Pass" width={90} height={90} className="rounded" />
                       </div>
+                    )}
+                    <div className="space-y-1 text-xs text-center sm:text-left">
+                      <p className="font-mono font-bold text-[#252525]">Ticket Ref: #{registrationData?.id.slice(-8).toUpperCase()}</p>
+                      <p className="text-[#77736A]">Reg No: {registrationData?.register_number}</p>
+                      <p className="text-[#77736A]">Student: {registrationData?.full_name}</p>
+                      <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-[11px] pt-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Digital Pass Verified & Active</span>
+                      </span>
                     </div>
                   </div>
-                ) : (
-                  /* Registration is Open */
+                </div>
+              ) : (() => {
+                const isFull = event.maximum_participants ? (event.registration_count || 0) >= event.maximum_participants : false;
+                const isExpired = event.registration_deadline ? new Date() > new Date(event.registration_deadline) : false;
+
+                if (!event.registration_enabled) {
+                  return (
+                    <div className="p-5 sm:p-6 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial space-y-2">
+                      <div className="flex items-center gap-2.5 text-rose-700 font-bold text-sm">
+                        <XCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                        <span>Registration is currently closed</span>
+                      </div>
+                      <p className="text-xs text-[#77736A] leading-relaxed">
+                        The event administration has turned off registrations for this event. You may still explore the schedule and event agenda below.
+                      </p>
+                    </div>
+                  );
+                }
+
+                if (isFull) {
+                  return (
+                    <div className="p-5 sm:p-6 rounded-3xl bg-amber-50/80 border border-amber-200 shadow-spatial space-y-2">
+                      <div className="flex items-center gap-2.5 text-amber-800 font-bold text-sm">
+                        <Users className="w-5 h-5 text-amber-600 shrink-0" />
+                        <span>Event Capacity Reached</span>
+                      </div>
+                      <p className="text-xs text-amber-700 leading-relaxed">
+                        All {event.maximum_participants} available seats for this event have been filled. Registration is now closed.
+                      </p>
+                    </div>
+                  );
+                }
+
+                if (isExpired) {
+                  return (
+                    <div className="p-5 sm:p-6 rounded-3xl bg-rose-50/80 border border-rose-200 shadow-spatial space-y-2">
+                      <div className="flex items-center gap-2.5 text-rose-800 font-bold text-sm">
+                        <Clock className="w-5 h-5 text-rose-600 shrink-0" />
+                        <span>Registration Deadline Passed</span>
+                      </div>
+                      <p className="text-xs text-rose-700 leading-relaxed">
+                        The registration deadline for this event was {new Date(event.registration_deadline!).toLocaleDateString()}. New registrations are no longer accepted.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
                   <div className="space-y-3">
                     {event.registration_type === 'external' && event.registration_url ? (
                       <a
@@ -374,19 +448,8 @@ export default function EventPageClient({ initialEvent }: EventPageClientProps) 
                       </p>
                     )}
                   </div>
-                )
-              ) : (
-                /* REGISTRATION OFF: Distinct Spatial Notice */
-                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial space-y-2">
-                  <div className="flex items-center gap-2.5 text-rose-700 font-bold text-sm">
-                    <XCircle className="w-5 h-5 text-rose-500 shrink-0" />
-                    <span>Registration is currently closed or unavailable</span>
-                  </div>
-                  <p className="text-xs text-[#77736A] leading-relaxed">
-                    The event administration has turned off registrations for this event, or seat capacity has been reached. You may still view the schedule and event agenda below.
-                  </p>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
           </div>

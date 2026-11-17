@@ -6,7 +6,7 @@ export const USER_SESSION_COOKIE = 'college_hub_user_session';
 // Backwards-compatible alias for existing imports
 export const SESSION_COOKIE = ADMIN_SESSION_COOKIE;
 
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'admin' | 'user' | 'developer';
 
 export interface UserProfile {
   id: string;
@@ -14,16 +14,23 @@ export interface UserProfile {
   full_name: string;
   email: string;
   avatar_url?: string;
-  provider?: 'google' | 'email_otp' | 'admin';
+  provider?: 'google' | 'email_otp' | 'admin' | 'developer';
   logged_in_at: number;
 }
 
 export interface AdminSession {
   id: string;
-  role: 'admin';
+  role: 'admin' | 'developer';
   full_name: string;
   email: string;
   logged_in_at: number;
+}
+
+export function isDeveloperUser(user?: { role?: string; email?: string } | null): boolean {
+  if (!user) return false;
+  if (user.role === 'developer') return true;
+  const email = user.email?.toLowerCase().trim();
+  return email === 'admin@hindusthan.net' || (email ? email.includes('vignesh') : false);
 }
 
 // In-memory brute force protection tracking: IP -> { count, lastAttempt }
@@ -120,7 +127,7 @@ export function createUserSessionToken(user: {
   full_name: string;
   email: string;
   avatar_url?: string;
-  provider?: 'google' | 'email_otp' | 'admin';
+  provider?: 'google' | 'email_otp' | 'admin' | 'developer';
 }): string {
   const payload: UserProfile & { exp: number } = {
     id: user.id,

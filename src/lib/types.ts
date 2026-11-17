@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'student';
+export type UserRole = 'admin' | 'student' | 'developer' | 'user';
 
 export interface Profile {
   id: string;
@@ -68,7 +68,14 @@ export interface EventItem {
   registration_type: RegistrationType;
   registration_url?: string;
   registration_deadline?: string;
+  maximum_participants?: number;
   publication_status: PublicationStatus;
+  event_status?: 'draft' | 'published' | 'registration_open' | 'registration_closed' | 'completed' | 'archived' | 'trash' | string;
+  is_deleted?: boolean;
+  deleted_by?: string;
+  deleted_at?: string;
+  restored_by?: string;
+  restored_at?: string;
   highlights?: string[];
   schedule?: ScheduleItem[];
   rules?: string[];

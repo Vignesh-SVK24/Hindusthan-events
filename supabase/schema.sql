@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   email TEXT NOT NULL UNIQUE,
   phone_number TEXT,
   profile_photo_url TEXT,
-  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'developer', 'student')),
   department TEXT,
   register_number TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -60,6 +60,12 @@ CREATE TABLE IF NOT EXISTS public.events (
   registration_deadline TIMESTAMPTZ,
   maximum_participants INTEGER,
   publication_status TEXT DEFAULT 'published' CHECK (publication_status IN ('published', 'draft', 'unpublished')),
+  is_deleted BOOLEAN DEFAULT false,
+  deleted_at TIMESTAMPTZ,
+  deleted_by TEXT,
+  restored_at TIMESTAMPTZ,
+  restored_by TEXT,
+  event_status TEXT DEFAULT 'published' CHECK (event_status IN ('published', 'draft', 'unpublished', 'trash', 'registration_open', 'registration_closed', 'completed', 'archived')),
   eligibility TEXT,
   highlights JSONB DEFAULT '[]'::jsonb,
   rules JSONB DEFAULT '[]'::jsonb,
@@ -75,6 +81,7 @@ CREATE TABLE IF NOT EXISTS public.events (
 
 CREATE INDEX IF NOT EXISTS idx_events_slug ON public.events(slug);
 CREATE INDEX IF NOT EXISTS idx_events_publication_status ON public.events(publication_status);
+CREATE INDEX IF NOT EXISTS idx_events_is_deleted ON public.events(is_deleted);
 CREATE INDEX IF NOT EXISTS idx_events_category ON public.events(category_id);
 CREATE INDEX IF NOT EXISTS idx_events_date ON public.events(event_date);
 
@@ -223,7 +230,21 @@ STABLE
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role = 'admin'
+    WHERE id = auth.uid() AND role IN ('admin', 'developer')
+  );
+$$;
+
+-- Security Definer: Check if executing user has developer privileges
+CREATE OR REPLACE FUNCTION public.is_developer()
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND (role = 'developer' OR email = 'admin@hindusthan.net')
   );
 $$;
 
@@ -293,7 +314,18 @@ CREATE POLICY "Admins can manage all profiles"
 DROP POLICY IF EXISTS "Public can view published events" ON public.events;
 CREATE POLICY "Public can view published events"
   ON public.events FOR SELECT
-  USING (publication_status = 'published' OR public.is_admin());
+  USING (
+    (is_deleted = false AND publication_status = 'published') 
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS "Developers can view trashed events" ON public.events;
+CREATE POLICY "Developers can view trashed events"
+  ON public.events FOR SELECT
+  TO authenticated
+  USING (
+    is_deleted = true AND (public.is_developer() OR public.is_admin())
+  );
 
 DROP POLICY IF EXISTS "Admins can insert events" ON public.events;
 CREATE POLICY "Admins can insert events"
@@ -308,11 +340,14 @@ CREATE POLICY "Admins can update events"
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+-- Deletion Protocol: Admins perform soft deletion via UPDATE (is_deleted = true).
+-- Permanent hard deletion is strictly restricted to developer clearance:
 DROP POLICY IF EXISTS "Admins can delete events" ON public.events;
-CREATE POLICY "Admins can delete events"
+DROP POLICY IF EXISTS "Developers can permanently delete events" ON public.events;
+CREATE POLICY "Developers can permanently delete events"
   ON public.events FOR DELETE
   TO authenticated
-  USING (public.is_admin());
+  USING (public.is_developer());
 
 -- 10.4 REGISTRATIONS POLICIES
 DROP POLICY IF EXISTS "Users can view own registrations" ON public.registrations;
@@ -327,7 +362,14 @@ CREATE POLICY "Anyone can register for published events"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.events
-      WHERE id = event_id AND registration_enabled = true AND publication_status = 'published'
+      WHERE id = event_id 
+        AND is_deleted = false 
+        AND registration_enabled = true 
+        AND publication_status = 'published'
+        AND (maximum_participants IS NULL OR (
+          SELECT count(*) FROM public.registrations WHERE event_id = events.id
+        ) < maximum_participants)
+        AND (registration_deadline IS NULL OR now() <= registration_deadline)
     )
   );
 

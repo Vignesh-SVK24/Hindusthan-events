@@ -453,9 +453,15 @@ export function getAllEvents(options?: {
   department?: string;
   search?: string;
   publicOnly?: boolean;
+  includeDeleted?: boolean;
 }): (EventItem & { theme?: EventTheme; category?: EventCategory; registration_count: number })[] {
   const db = getDatabase();
   let events = [...db.events];
+
+  // Exclude soft-deleted events unless specifically requested (Developer Trash Console)
+  if (!options?.includeDeleted) {
+    events = events.filter((e) => !e.is_deleted);
+  }
 
   if (options?.publicOnly) {
     events = events.filter((e) => e.publication_status === 'published');
@@ -496,10 +502,19 @@ export function getAllEvents(options?: {
   });
 }
 
-export function getEventBySlug(slug: string): (EventItem & { theme?: EventTheme; category?: EventCategory; media: EventMedia[]; registration_count: number }) | null {
+export function getEventBySlug(slug: string, options?: { includeDeleted?: boolean }): (EventItem & { theme?: EventTheme; category?: EventCategory; media: EventMedia[]; registration_count: number }) | null {
   const db = getDatabase();
   const event = db.events.find((e) => e.slug === slug);
   if (!event) return null;
+
+  if (!options?.includeDeleted && event.is_deleted) {
+    return {
+      ...event,
+      is_deleted: true,
+      media: [],
+      registration_count: 0,
+    };
+  }
 
   const theme = db.event_themes.find((t) => t.event_id === event.id);
   const category = db.event_categories.find((c) => c.id === event.category_id);
@@ -560,10 +575,11 @@ export function createEvent(eventData: Omit<EventItem, 'id' | 'created_at' | 'up
   return newEvent;
 }
 
-export function updateEvent(id: string, updates: Partial<EventItem>, themeUpdates?: Partial<EventTheme>): EventItem | null {
+export function updateEvent(idOrSlug: string, updates: Partial<EventItem>, themeUpdates?: Partial<EventTheme>): EventItem | null {
   const db = getDatabase();
-  const eventIndex = db.events.findIndex((e) => e.id === id);
+  const eventIndex = db.events.findIndex((e) => e.id === idOrSlug || e.slug === idOrSlug);
   if (eventIndex === -1) return null;
+  const id = db.events[eventIndex].id;
 
   // If slug was updated, ensure uniqueness
   if (updates.slug && updates.slug !== db.events[eventIndex].slug) {
@@ -606,18 +622,64 @@ export function updateEvent(id: string, updates: Partial<EventItem>, themeUpdate
   return db.events[eventIndex];
 }
 
-export function deleteEvent(id: string): boolean {
+export function softDeleteEvent(idOrSlug: string, deletedBy: string = 'admin'): boolean {
   const db = getDatabase();
-  const initialLen = db.events.length;
-  db.events = db.events.filter((e) => e.id !== id);
-  if (db.events.length === initialLen) return false;
+  const event = db.events.find((e) => e.id === idOrSlug || e.slug === idOrSlug);
+  if (!event) return false;
 
-  db.event_themes = db.event_themes.filter((t) => t.event_id !== id);
-  db.event_media = db.event_media.filter((m) => m.event_id !== id);
-  db.event_registrations = db.event_registrations.filter((r) => r.event_id !== id);
+  event.is_deleted = true;
+  event.deleted_at = new Date().toISOString();
+  event.deleted_by = deletedBy;
+  event.event_status = 'trash';
+  event.updated_at = new Date().toISOString();
 
   saveDatabase(db);
   return true;
+}
+
+// Default delete operation is now safe soft deletion
+export const deleteEvent = softDeleteEvent;
+
+export function restoreEvent(idOrSlug: string, restoredBy: string = 'developer'): boolean {
+  const db = getDatabase();
+  const event = db.events.find((e) => e.id === idOrSlug || e.slug === idOrSlug);
+  if (!event) return false;
+
+  event.is_deleted = false;
+  event.restored_at = new Date().toISOString();
+  event.restored_by = restoredBy;
+  event.event_status = 'published';
+  event.updated_at = new Date().toISOString();
+
+  saveDatabase(db);
+  return true;
+}
+
+export function permanentDeleteEvent(idOrSlug: string): boolean {
+  const db = getDatabase();
+  const event = db.events.find((e) => e.id === idOrSlug || e.slug === idOrSlug);
+  if (!event) return false;
+
+  const eventId = event.id;
+  db.events = db.events.filter((e) => e.id !== eventId);
+  db.event_themes = db.event_themes.filter((t) => t.event_id !== eventId);
+  db.event_media = db.event_media.filter((m) => m.event_id !== eventId);
+  db.event_registrations = db.event_registrations.filter((r) => r.event_id !== eventId);
+
+  saveDatabase(db);
+  return true;
+}
+
+export function getTrashedEvents(): (EventItem & { registration_count: number })[] {
+  const db = getDatabase();
+  const trashed = db.events.filter((e) => e.is_deleted === true);
+  return trashed.map((event) => {
+    const regCount = db.event_registrations.filter((r) => r.event_id === event.id).length;
+    return {
+      ...event,
+      registration_count: regCount,
+    };
+  });
 }
 
 export function registerUserForEvent(data: {
@@ -636,6 +698,11 @@ export function registerUserForEvent(data: {
     return { success: false, message: 'Event not found.' };
   }
 
+  // Soft delete guard
+  if (event.is_deleted) {
+    return { success: false, message: 'This event is currently unavailable or removed.' };
+  }
+
   // CORE BUSINESS RULE: Registration ON/OFF Enforcement
   if (!event.registration_enabled) {
     return { success: false, message: 'Registration is closed or unavailable for this event.' };
@@ -643,6 +710,14 @@ export function registerUserForEvent(data: {
 
   if (event.publication_status !== 'published') {
     return { success: false, message: 'Event is not currently published.' };
+  }
+
+  // Capacity limit enforcement
+  if (event.maximum_participants && typeof event.maximum_participants === 'number' && event.maximum_participants > 0) {
+    const currentCount = db.event_registrations.filter((r) => r.event_id === event.id && r.registration_status !== 'cancelled').length;
+    if (currentCount >= event.maximum_participants) {
+      return { success: false, message: `Registration is full. Maximum event capacity (${event.maximum_participants} participants) has been reached.` };
+    }
   }
 
   // Check registration deadline if present
@@ -695,6 +770,11 @@ export function getUserRegistrations(userId: string): (EventRegistration & { eve
       event,
     };
   }).filter((r) => !!r.event);
+}
+
+export function getRegistrationsForEvent(eventId: string): EventRegistration[] {
+  const db = getDatabase();
+  return db.event_registrations.filter((r) => r.event_id === eventId);
 }
 
 export function getAdminStats() {

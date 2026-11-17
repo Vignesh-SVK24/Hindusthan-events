@@ -32,11 +32,15 @@ export async function getCategories(): Promise<EventCategory[]> {
 // ============================================================================
 // 2. EVENTS
 // ============================================================================
-export async function getEvents(options: { publicOnly?: boolean; categoryId?: string; search?: string } = {}): Promise<any[]> {
+export async function getEvents(options: { publicOnly?: boolean; categoryId?: string; search?: string; includeDeleted?: boolean } = {}): Promise<any[]> {
   const supabase = getSupabaseServerClient();
   if (supabase) {
     try {
       let query = supabase.from('events').select('*');
+
+      if (!options.includeDeleted) {
+        query = query.or('is_deleted.is.null,is_deleted.eq.false');
+      }
 
       if (options.publicOnly) {
         query = query.eq('publication_status', 'published');
@@ -66,19 +70,28 @@ export async function getEvents(options: { publicOnly?: boolean; categoryId?: st
     publicOnly: options.publicOnly,
     category_id: options.categoryId,
     search: options.search,
+    includeDeleted: options.includeDeleted,
   });
 }
 
-export async function getEventBySlug(slug: string): Promise<any | null> {
+export async function getEventBySlug(slug: string, options: { includeDeleted?: boolean } = {}): Promise<any | null> {
   const supabase = getSupabaseServerClient();
   if (supabase) {
     try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('slug', slug)
-        .single();
+      let query = supabase.from('events').select('*').eq('slug', slug);
+      if (!options.includeDeleted) {
+        // Query will fetch it, but we tag is_deleted if soft-deleted
+      }
+      const { data, error } = await query.single();
       if (!error && data) {
+        if (!options.includeDeleted && data.is_deleted) {
+          return {
+            ...data,
+            is_deleted: true,
+            start_date: data.event_date || data.start_date,
+            theme: data.theme || {},
+          };
+        }
         return {
           ...data,
           start_date: data.event_date || data.start_date,
@@ -89,7 +102,7 @@ export async function getEventBySlug(slug: string): Promise<any | null> {
       console.warn('Supabase event by slug error, falling back to local storage:', err);
     }
   }
-  return localDb.getEventBySlug(slug);
+  return localDb.getEventBySlug(slug, options);
 }
 
 export async function createEvent(eventData: Partial<EventItem>, themeData?: Partial<EventTheme>, createdBy?: string): Promise<any> {
@@ -116,7 +129,10 @@ export async function createEvent(eventData: Partial<EventItem>, themeData?: Par
         registration_type: eventData.registration_type || 'builtin',
         registration_url: eventData.registration_url || '',
         registration_deadline: eventData.registration_deadline || null,
+        maximum_participants: eventData.maximum_participants || null,
         publication_status: eventData.publication_status || 'published',
+        event_status: eventData.event_status || 'published',
+        is_deleted: false,
         eligibility: eventData.eligibility || '',
         highlights: eventData.highlights || [],
         rules: eventData.rules || [],
@@ -164,7 +180,10 @@ export async function createEvent(eventData: Partial<EventItem>, themeData?: Par
     registration_type: eventData.registration_type || 'builtin',
     registration_url: eventData.registration_url || '',
     registration_deadline: eventData.registration_deadline || '',
+    maximum_participants: eventData.maximum_participants,
     publication_status: eventData.publication_status || 'published',
+    event_status: eventData.event_status || 'published',
+    is_deleted: false,
     highlights: eventData.highlights || [],
     rules: eventData.rules || [],
     schedule: eventData.schedule || [],
@@ -209,20 +228,123 @@ export async function updateEvent(slug: string, eventData: Partial<EventItem>, t
   return localDb.updateEvent(existing.id, eventData, themeData);
 }
 
-export async function deleteEvent(slug: string): Promise<boolean> {
+export async function softDeleteEvent(slug: string, deletedBy?: string): Promise<boolean> {
   const supabase = getSupabaseServerClient(true);
   if (supabase) {
     try {
-      const { error } = await supabase.from('events').delete().eq('slug', slug);
-      if (!error) return true;
+      const now = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('events')
+        .update({
+          is_deleted: true,
+          deleted_at: now,
+          deleted_by: deletedBy || null,
+          event_status: 'trash',
+          updated_at: now,
+        })
+        .eq('slug', slug)
+        .select()
+        .single();
+
+      if (!error && data) {
+        await supabase.from('event_history').insert({
+          event_id: data.id,
+          activity_type: 'TRASHED',
+          activity_description: `Event "${data.title}" moved to trash.`,
+          performed_by: deletedBy || null,
+        });
+        localDb.softDeleteEvent(slug, deletedBy);
+        return true;
+      }
     } catch (err) {
-      console.warn('Supabase deleteEvent error, falling back to local storage:', err);
+      console.warn('Supabase softDeleteEvent error, falling back to local storage:', err);
     }
   }
 
-  const existing = localDb.getEventBySlug(slug);
-  if (!existing) return false;
-  return localDb.deleteEvent(existing.id);
+  return localDb.softDeleteEvent(slug, deletedBy);
+}
+
+// Backwards-compatible alias for existing calls: safe soft deletion
+export const deleteEvent = softDeleteEvent;
+
+export async function restoreEvent(slug: string, restoredBy?: string): Promise<boolean> {
+  const supabase = getSupabaseServerClient(true);
+  if (supabase) {
+    try {
+      const now = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('events')
+        .update({
+          is_deleted: false,
+          restored_at: now,
+          restored_by: restoredBy || null,
+          event_status: 'published',
+          updated_at: now,
+        })
+        .eq('slug', slug)
+        .select()
+        .single();
+
+      if (!error && data) {
+        await supabase.from('event_history').insert({
+          event_id: data.id,
+          activity_type: 'RESTORED',
+          activity_description: `Event "${data.title}" restored from trash.`,
+          performed_by: restoredBy || null,
+        });
+        localDb.restoreEvent(slug, restoredBy);
+        return true;
+      }
+    } catch (err) {
+      console.warn('Supabase restoreEvent error, falling back to local storage:', err);
+    }
+  }
+
+  return localDb.restoreEvent(slug, restoredBy);
+}
+
+export async function permanentDeleteEvent(slug: string): Promise<boolean> {
+  const supabase = getSupabaseServerClient(true);
+  if (supabase) {
+    try {
+      const { data: ev } = await supabase.from('events').select('id').eq('slug', slug).single();
+      if (ev) {
+        await supabase.from('registrations').delete().eq('event_id', ev.id);
+        await supabase.from('event_history').delete().eq('event_id', ev.id);
+        await supabase.from('events').delete().eq('id', ev.id);
+        localDb.permanentDeleteEvent(slug);
+        return true;
+      }
+    } catch (err) {
+      console.warn('Supabase permanentDeleteEvent error, falling back to local storage:', err);
+    }
+  }
+
+  return localDb.permanentDeleteEvent(slug);
+}
+
+export async function getTrashedEvents(): Promise<any[]> {
+  const supabase = getSupabaseServerClient(true);
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*, registrations(count)')
+        .eq('is_deleted', true)
+        .order('deleted_at', { ascending: false });
+
+      if (!error && data) {
+        return data.map((ev: any) => ({
+          ...ev,
+          registration_count: ev.registrations?.[0]?.count || 0,
+        }));
+      }
+    } catch (err) {
+      console.warn('Supabase getTrashedEvents error, falling back to local storage:', err);
+    }
+  }
+
+  return localDb.getTrashedEvents();
 }
 
 // ============================================================================
@@ -247,7 +369,7 @@ export async function registerForEvent(
       // Find event
       const { data: event, error: eventErr } = await supabase
         .from('events')
-        .select('id, title, registration_enabled, publication_status')
+        .select('id, title, registration_enabled, publication_status, is_deleted, maximum_participants, registration_deadline')
         .eq('slug', eventSlug)
         .single();
 
@@ -255,8 +377,30 @@ export async function registerForEvent(
         return { success: false, error: 'Event not found.' };
       }
 
+      if (event.is_deleted) {
+        return { success: false, error: 'This event is currently unavailable or removed.' };
+      }
+
       if (!event.registration_enabled || event.publication_status !== 'published') {
         return { success: false, error: 'Registrations are currently closed for this event.' };
+      }
+
+      if (event.registration_deadline) {
+        if (new Date() > new Date(event.registration_deadline)) {
+          return { success: false, error: 'The registration deadline for this event has passed.' };
+        }
+      }
+
+      if (event.maximum_participants && typeof event.maximum_participants === 'number' && event.maximum_participants > 0) {
+        const { count, error: countErr } = await supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .neq('registration_status', 'cancelled');
+
+        if (!countErr && typeof count === 'number' && count >= event.maximum_participants) {
+          return { success: false, error: `Event registration is full. Maximum participant capacity (${event.maximum_participants}) reached.` };
+        }
       }
 
       const normalizedEmail = registrationData.email.trim().toLowerCase();

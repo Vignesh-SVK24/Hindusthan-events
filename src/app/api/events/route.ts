@@ -25,9 +25,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    // Security check: Only Admin can create events
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized: Admin privileges required' }, { status: 403 });
+    // Security check: Only Admin or Developer can create events
+    if (!user || (user.role !== 'admin' && user.role !== 'developer')) {
+      return NextResponse.json({ error: 'Unauthorized: Admin or Developer privileges required' }, { status: 403 });
     }
 
     const body = await request.json();

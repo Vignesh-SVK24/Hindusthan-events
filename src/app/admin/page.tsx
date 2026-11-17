@@ -26,7 +26,10 @@ import {
   ExternalLink,
   Clock,
   AlertCircle,
-  History
+  History,
+  RotateCcw,
+  ShieldAlert,
+  Key
 } from 'lucide-react';
 import { EventItem, EventCategory, EventTheme, ThemePreset } from '@/lib/types';
 import { THEME_PRESETS } from '@/lib/themePresets';
@@ -34,11 +37,13 @@ import AdminArchiveManager from '@/components/AdminArchiveManager';
 import { SkeletonDashboard, SkeletonTable, SkeletonBase } from '@/components/skeleton';
 
 export default function AdminPage() {
-  const { user, isAdmin, isLoading, logout } = useAuth();
+  const { user, isAdmin, isDeveloper, isLoading, logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'create' | 'registrations' | 'archives'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'manage' | 'create' | 'registrations' | 'archives' | 'trash'>('overview');
   const [stats, setStats] = useState<any>(null);
-  const [events, setEvents] = useState<(EventItem & { category?: EventCategory; theme?: EventTheme; registration_count?: number })[]>([]);
+  const [events, setEvents] = useState<(EventItem & { category?: EventCategory; theme?: EventTheme; registration_count?: number; maximum_participants?: number })[]>([]);
+  const [trashedEvents, setTrashedEvents] = useState<any[]>([]);
+  const [actionLoadingSlug, setActionLoadingSlug] = useState<string | null>(null);
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
@@ -70,6 +75,7 @@ export default function AdminPage() {
     start_time: '09:00',
     end_time: '17:00',
     venue: '',
+    maximum_participants: undefined as number | undefined,
     registration_enabled: true,
     registration_type: 'builtin' as 'builtin' | 'external',
     registration_url: '',
@@ -114,11 +120,12 @@ export default function AdminPage() {
   const loadAdminData = async () => {
     setDataLoading(true);
     try {
-      const [statsRes, eventsRes, catRes, regRes] = await Promise.all([
+      const [statsRes, eventsRes, catRes, regRes, trashRes] = await Promise.all([
         fetch('/api/admin/stats'),
         fetch('/api/events?publicOnly=false'),
         fetch('/api/categories'),
         fetch('/api/admin/registrations'),
+        fetch('/api/admin/trash'),
       ]);
 
       if (statsRes.ok) {
@@ -136,6 +143,10 @@ export default function AdminPage() {
       if (regRes.ok) {
         const rData = await regRes.json();
         setRegistrations(rData.registrations || []);
+      }
+      if (trashRes.ok) {
+        const tData = await trashRes.json();
+        setTrashedEvents(tData.events || []);
       }
     } catch (err) {
       console.error('Error loading admin data:', err);
@@ -218,8 +229,8 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteEvent = async (eventItem: EventItem) => {
-    if (!confirm(`Are you sure you want to permanently delete "${eventItem.title}"?`)) {
+  const handleMoveToTrash = async (eventItem: EventItem) => {
+    if (!confirm(`Move "${eventItem.title}" to Trash?\n\nIt will be immediately removed from the live website, homepage, and searches. All participant registrations remain safely preserved and can be restored by the developer.`)) {
       return;
     }
 
@@ -227,11 +238,70 @@ export default function AdminPage() {
       const res = await fetch(`/api/events/${eventItem.slug}`, {
         method: 'DELETE',
       });
+      const data = await res.json();
       if (res.ok) {
         await loadAdminData();
+        alert(data.message || `"${eventItem.title}" has been moved to Trash.`);
+      } else {
+        alert(data.error || 'Failed to move event to Trash.');
       }
     } catch (err) {
-      console.error('Failed to delete event:', err);
+      console.error('Failed to move event to trash:', err);
+    }
+  };
+
+  const handleRestoreEvent = async (eventItem: any) => {
+    if (!confirm(`Restore "${eventItem.title}" from Trash?\n\nThis will reinstate the event on the public website and restore its dynamic URL (/events/${eventItem.slug}).`)) {
+      return;
+    }
+
+    setActionLoadingSlug(eventItem.slug);
+    try {
+      const res = await fetch(`/api/admin/events/${eventItem.slug}/restore`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await loadAdminData();
+        alert(data.message || `Event "${eventItem.title}" has been restored successfully!`);
+      } else {
+        alert(data.error || 'Failed to restore event');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Restoration failed');
+    } finally {
+      setActionLoadingSlug(null);
+    }
+  };
+
+  const handlePermanentDelete = async (eventItem: any) => {
+    const confirmation = prompt(
+      `WARNING: PERMANENT IRREVERSIBLE DELETION\n\nThis will permanently erase "${eventItem.title}" and all its ${eventItem.registration_count || 0} registration records from the database.\n\nTo confirm, type the slug "${eventItem.slug}" below:`
+    );
+
+    if (confirmation !== eventItem.slug) {
+      if (confirmation !== null) {
+        alert('Slug did not match. Permanent deletion cancelled.');
+      }
+      return;
+    }
+
+    setActionLoadingSlug(eventItem.slug);
+    try {
+      const res = await fetch(`/api/admin/events/${eventItem.slug}/permanent`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await loadAdminData();
+        alert(data.message || `Event "${eventItem.title}" has been permanently erased.`);
+      } else {
+        alert(data.error || 'Failed to delete event');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Permanent deletion failed');
+    } finally {
+      setActionLoadingSlug(null);
     }
   };
 
@@ -253,6 +323,7 @@ export default function AdminPage() {
       start_time: eventItem.start_time,
       end_time: eventItem.end_time,
       venue: eventItem.venue,
+      maximum_participants: eventItem.maximum_participants,
       registration_enabled: eventItem.registration_enabled,
       registration_type: eventItem.registration_type || 'builtin',
       registration_url: eventItem.registration_url || '',
@@ -290,6 +361,7 @@ export default function AdminPage() {
       start_time: '09:00',
       end_time: '17:00',
       venue: 'Main Auditorium, Valley Campus',
+      maximum_participants: undefined,
       registration_enabled: true,
       registration_type: 'builtin',
       registration_url: '',
@@ -524,6 +596,24 @@ export default function AdminPage() {
           >
             <History className="w-4 h-4 text-[#C99A27]" />
             <span>Manage Event Archives</span>
+          </button>
+
+          {/* TAB 6: DEVELOPER TRASH & RECOVERY */}
+          <button
+            onClick={() => setActiveTab('trash')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all ${
+              activeTab === 'trash'
+                ? 'bg-rose-100 text-rose-900 border border-rose-300 shadow-[0_4px_12px_rgba(244,63,94,0.2)]'
+                : 'text-[#77736A] hover:text-rose-700 bg-white border border-[#F0E8D4] shadow-sm'
+            }`}
+          >
+            <RotateCcw className="w-4 h-4 text-rose-600" />
+            <span>Developer Trash ({trashedEvents.length})</span>
+            {isDeveloper && (
+              <span className="text-[10px] bg-rose-200 text-rose-800 px-1.5 py-0.5 rounded font-black uppercase">
+                Dev Console
+              </span>
+            )}
           </button>
         </div>
 
@@ -764,8 +854,21 @@ export default function AdminPage() {
                               {ev.publication_status}
                             </button>
                           </td>
-                          <td className="py-4 px-4 text-center font-black text-[#252525]">
-                            {ev.registration_count || 0}
+                          <td className="py-4 px-4 text-center">
+                            <div className="inline-flex items-center justify-center gap-1 font-black text-[#252525]">
+                              <span>{ev.registration_count || 0}</span>
+                              <span className="text-[#77736A] font-normal text-[11px]">/ {ev.maximum_participants || '∞'}</span>
+                              <button
+                                onClick={() => {
+                                  setRegFilterEvent(ev.id);
+                                  setActiveTab('registrations');
+                                }}
+                                className="ml-1 p-1 rounded-full text-[#C99A27] hover:bg-[#FFF0B3] transition-colors"
+                                title="View registrations for this event"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </td>
                           <td className="py-4 px-4 sm:px-6 text-right">
                             <div className="flex items-center justify-end gap-1.5">
@@ -785,9 +888,9 @@ export default function AdminPage() {
                                 <Edit3 className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handleDeleteEvent(ev)}
+                                onClick={() => handleMoveToTrash(ev)}
                                 className="p-2 rounded-full text-[#77736A] hover:text-rose-600 hover:bg-rose-50"
-                                title="Delete Event"
+                                title="Move to Trash (Soft Delete)"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -1110,6 +1213,50 @@ export default function AdminPage() {
                     <p className="text-[11px] opacity-75 mt-0.5">Registration locked/closed</p>
                   </button>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#FFE99A]">
+                  <div>
+                    <label className="block text-xs font-bold text-[#252525] mb-1">
+                      Participant Capacity Limit (Max Seats)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="e.g. 250 (leave empty for unlimited)"
+                      value={formData.maximum_participants ?? ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          maximum_participants: e.target.value ? parseInt(e.target.value, 10) : undefined,
+                        })
+                      }
+                      className="w-full px-4 py-2.5 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F]"
+                    />
+                    <p className="text-[11px] text-[#77736A] mt-1">
+                      Registration automatically closes once this seat limit is reached.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#252525] mb-1">
+                      Registration Deadline (Date & Time)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formData.registration_deadline ? formData.registration_deadline.slice(0, 16) : ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          registration_deadline: e.target.value ? new Date(e.target.value).toISOString() : '',
+                        })
+                      }
+                      className="w-full px-4 py-2.5 rounded-full bg-white border border-[#F0E8D4] text-[#252525] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#E7B83F]"
+                    />
+                    <p className="text-[11px] text-[#77736A] mt-1">
+                      Cut-off time after which new registrations are locked.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Section F: Event Theme Studio */}
@@ -1315,6 +1462,153 @@ export default function AdminPage() {
         {/* TAB 5: AIML EVENT ARCHIVES */}
         {activeTab === 'archives' && (
           <AdminArchiveManager />
+        )}
+
+        {/* TAB 6: DEVELOPER TRASH & RECOVERY CONSOLE */}
+        {activeTab === 'trash' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-black text-[#252525]">Developer Trash & Event Recovery Console</h2>
+                  <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                    Cold Storage
+                  </span>
+                </div>
+                <p className="text-xs text-[#77736A] mt-1 max-w-2xl leading-relaxed">
+                  Events moved to Trash by administrators are immediately removed from public listings and the homepage, but their database schemas, schedules, and student registration records remain 100% preserved. Only verified developers can restore or permanently delete these events.
+                </p>
+              </div>
+
+              <div>
+                {isDeveloper ? (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Developer Clearance: Authorized</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-sm">
+                    <ShieldAlert className="w-4 h-4 text-amber-600" />
+                    <span>Admin View (Recovery requires Developer role)</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {trashedEvents.length === 0 ? (
+              <div className="p-12 text-center rounded-3xl bg-white border border-[#F0E8D4] shadow-spatial space-y-3">
+                <div className="w-12 h-12 rounded-full bg-[#FFF9E8] border border-[#F0E8D4] flex items-center justify-center mx-auto text-[#C99A27]">
+                  <RotateCcw className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-[#252525]">Trash is completely empty</h3>
+                <p className="text-xs text-[#77736A] max-w-md mx-auto">
+                  No events have been moved to Trash. All created events are currently active or published in the main management table.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-[#F0E8D4] bg-white overflow-hidden shadow-spatial">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#FFF9E8] border-b border-[#F0E8D4] text-[#77736A] uppercase font-bold">
+                      <tr>
+                        <th className="py-4 px-4 sm:px-6">Trashed Event</th>
+                        <th className="py-4 px-4">Deleted At</th>
+                        <th className="py-4 px-4">Deleted By</th>
+                        <th className="py-4 px-4 text-center">Preserved Registrations</th>
+                        <th className="py-4 px-4 text-center">Lifecycle</th>
+                        <th className="py-4 px-4 sm:px-6 text-right">Developer Controls</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F0E8D4]">
+                      {trashedEvents.map((ev) => (
+                        <tr key={ev.id} className="hover:bg-[#FFFDF5] transition-colors">
+                          <td className="py-4 px-4 sm:px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="relative w-10 h-14 rounded-lg overflow-hidden bg-[#FFF9E8] border border-[#F0E8D4] shrink-0">
+                                <Image
+                                  src={ev.poster_url || '/college-logo.jpg'}
+                                  alt={ev.title}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div>
+                                <div className="font-bold text-[#252525] text-sm">{ev.title}</div>
+                                <div className="font-mono text-[11px] text-[#C99A27]">/events/{ev.slug}</div>
+                                <div className="text-[10px] text-[#77736A]">{ev.category_id || 'General Event'}</div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="py-4 px-4 text-[#77736A]">
+                            <div className="font-medium text-[#252525]">
+                              {ev.deleted_at ? new Date(ev.deleted_at).toLocaleDateString() : 'Recent'}
+                            </div>
+                            <div className="text-[10px] text-[#77736A]">
+                              {ev.deleted_at ? new Date(ev.deleted_at).toLocaleTimeString() : ''}
+                            </div>
+                          </td>
+
+                          <td className="py-4 px-4 text-[#77736A]">
+                            <span className="font-mono text-xs text-[#252525]">
+                              {ev.deleted_by || 'Admin Console'}
+                            </span>
+                          </td>
+
+                          <td className="py-4 px-4 text-center">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-800 border border-blue-200">
+                              <Users className="w-3.5 h-3.5 text-blue-600" />
+                              <span>{ev.registration_count || 0} Preserved</span>
+                            </span>
+                          </td>
+
+                          <td className="py-4 px-4 text-center">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-100 text-rose-800 border border-rose-300">
+                              Soft Deleted
+                            </span>
+                          </td>
+
+                          <td className="py-4 px-4 sm:px-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {/* 1-Click Developer Restore */}
+                              <button
+                                onClick={() => handleRestoreEvent(ev)}
+                                disabled={actionLoadingSlug === ev.slug || !isDeveloper}
+                                title={isDeveloper ? "Restore event to public website" : "Developer role required to restore"}
+                                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black shadow-sm transition-all ${
+                                  isDeveloper
+                                    ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                }`}
+                              >
+                                <RotateCcw className={`w-3.5 h-3.5 ${actionLoadingSlug === ev.slug ? 'animate-spin' : ''}`} />
+                                <span>Restore Event</span>
+                              </button>
+
+                              {/* Developer Permanent Delete with Safety Dialog */}
+                              <button
+                                onClick={() => handlePermanentDelete(ev)}
+                                disabled={actionLoadingSlug === ev.slug || !isDeveloper}
+                                title={isDeveloper ? "Permanently erase from database" : "Developer role required"}
+                                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                                  isDeveloper
+                                    ? 'text-rose-700 hover:text-rose-900 hover:bg-rose-50 border border-transparent hover:border-rose-200'
+                                    : 'text-gray-300 cursor-not-allowed'
+                                }`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Delete Permanently</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
       </div>

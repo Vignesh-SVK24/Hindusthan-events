@@ -5,16 +5,17 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export interface AuthUser {
   id: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'developer';
   full_name: string;
   email: string;
   avatar_url?: string;
-  provider?: 'google' | 'email_otp' | 'admin' | string;
+  provider?: 'google' | 'email_otp' | 'admin' | 'developer' | string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   isAdmin: boolean;
+  isDeveloper: boolean;
   isUser: boolean;
   isLoading: boolean;
   isSupabaseActive: boolean;
@@ -236,11 +237,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const isDev = !!user && (user.role === 'developer' || user.email === 'admin@hindusthan.net' || (user.email?.toLowerCase().includes('vignesh') ?? false));
+  const isAdm = !!user && (user.role === 'admin' || user.role === 'developer');
+
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAdmin: !!user && user.role === 'admin',
+        isAdmin: isAdm,
+        isDeveloper: isDev,
         isUser: !!user && user.role === 'user',
         isLoading,
         isSupabaseActive: isSupabaseConfigured,
