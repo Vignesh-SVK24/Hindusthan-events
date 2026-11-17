@@ -257,10 +257,12 @@ ALTER TABLE public.admin_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_archives ENABLE ROW LEVEL SECURITY;
 
 -- 10.1 CATEGORIES POLICIES
+DROP POLICY IF EXISTS "Public can view categories" ON public.categories;
 CREATE POLICY "Public can view categories"
   ON public.categories FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage categories" ON public.categories;
 CREATE POLICY "Admins can manage categories"
   ON public.categories FOR ALL
   TO authenticated
@@ -268,16 +270,19 @@ CREATE POLICY "Admins can manage categories"
   WITH CHECK (public.is_admin());
 
 -- 10.2 PROFILES POLICIES
+DROP POLICY IF EXISTS "Public can view basic profiles" ON public.profiles;
 CREATE POLICY "Public can view basic profiles"
   ON public.profiles FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile"
   ON public.profiles FOR UPDATE
   TO authenticated
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Admins can manage all profiles" ON public.profiles;
 CREATE POLICY "Admins can manage all profiles"
   ON public.profiles FOR ALL
   TO authenticated
@@ -285,32 +290,38 @@ CREATE POLICY "Admins can manage all profiles"
   WITH CHECK (public.is_admin());
 
 -- 10.3 EVENTS POLICIES
+DROP POLICY IF EXISTS "Public can view published events" ON public.events;
 CREATE POLICY "Public can view published events"
   ON public.events FOR SELECT
   USING (publication_status = 'published' OR public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can insert events" ON public.events;
 CREATE POLICY "Admins can insert events"
   ON public.events FOR INSERT
   TO authenticated
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update events" ON public.events;
 CREATE POLICY "Admins can update events"
   ON public.events FOR UPDATE
   TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete events" ON public.events;
 CREATE POLICY "Admins can delete events"
   ON public.events FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- 10.4 REGISTRATIONS POLICIES
+DROP POLICY IF EXISTS "Users can view own registrations" ON public.registrations;
 CREATE POLICY "Users can view own registrations"
   ON public.registrations FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id OR participant_email = (auth.jwt() ->> 'email') OR public.is_admin());
 
+DROP POLICY IF EXISTS "Anyone can register for published events" ON public.registrations;
 CREATE POLICY "Anyone can register for published events"
   ON public.registrations FOR INSERT
   WITH CHECK (
@@ -320,38 +331,45 @@ CREATE POLICY "Anyone can register for published events"
     )
   );
 
+DROP POLICY IF EXISTS "Admins can update registrations" ON public.registrations;
 CREATE POLICY "Admins can update registrations"
   ON public.registrations FOR UPDATE
   TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete registrations" ON public.registrations;
 CREATE POLICY "Admins can delete registrations"
   ON public.registrations FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- 10.5 EVENT HISTORY POLICIES
+DROP POLICY IF EXISTS "Public can view event history" ON public.event_history;
 CREATE POLICY "Public can view event history"
   ON public.event_history FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can insert event history" ON public.event_history;
 CREATE POLICY "Admins can insert event history"
   ON public.event_history FOR INSERT
   TO authenticated
   WITH CHECK (public.is_admin());
 
 -- 10.6 ADMIN LOGS POLICIES
+DROP POLICY IF EXISTS "Admins can view admin logs" ON public.admin_logs;
 CREATE POLICY "Admins can view admin logs"
   ON public.admin_logs FOR SELECT
   TO authenticated
   USING (public.is_admin());
 
 -- 10.7 EVENT ARCHIVES POLICIES
+DROP POLICY IF EXISTS "Public can view event archives" ON public.event_archives;
 CREATE POLICY "Public can view event archives"
   ON public.event_archives FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage event archives" ON public.event_archives;
 CREATE POLICY "Admins can manage event archives"
   ON public.event_archives FOR ALL
   TO authenticated
@@ -372,24 +390,29 @@ ON CONFLICT (id) DO UPDATE SET
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- Storage RLS Policies
+DROP POLICY IF EXISTS "Public read for event posters" ON storage.objects;
 CREATE POLICY "Public read for event posters"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'event-posters');
 
+DROP POLICY IF EXISTS "Admins can upload event posters" ON storage.objects;
 CREATE POLICY "Admins can upload event posters"
   ON storage.objects FOR INSERT
   TO authenticated
   WITH CHECK (bucket_id = 'event-posters' AND public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete event posters" ON storage.objects;
 CREATE POLICY "Admins can delete event posters"
   ON storage.objects FOR DELETE
   TO authenticated
   USING (bucket_id = 'event-posters' AND public.is_admin());
 
+DROP POLICY IF EXISTS "Public read for profile photos" ON storage.objects;
 CREATE POLICY "Public read for profile photos"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'profile-photos');
 
+DROP POLICY IF EXISTS "Users can upload their own profile photo" ON storage.objects;
 CREATE POLICY "Users can upload their own profile photo"
   ON storage.objects FOR INSERT
   TO authenticated
