@@ -269,15 +269,15 @@ export default function UnifiedLoginPage() {
             >
               
               {/* College Logo & Institution Name */}
-              <div className="flex items-center gap-3.5">
-                <div className="relative w-11 h-13 sm:w-13 sm:h-15 rounded-xl overflow-hidden bg-white p-1 border border-[#F0E8D4] shadow-xs shrink-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-4">
+                <div className="relative h-12 sm:h-14 md:h-16 aspect-[668/191] rounded-xl overflow-hidden bg-white p-1.5 border border-[#F0E8D4] shadow-xs shrink-0">
                   <Image
-                    src="/college-logo.jpg"
-                    alt="Hindusthan College of Engineering and Technology"
+                    src="/hindusthan-banner-logo.jpg"
+                    alt="Hindusthan Educational Institutions"
                     fill
                     priority
-                    className="object-contain p-0.5"
-                    sizes="64px"
+                    className="object-contain"
+                    sizes="(max-width: 640px) 168px, (max-width: 768px) 196px, 224px"
                   />
                 </div>
                 <div className="min-w-0">
