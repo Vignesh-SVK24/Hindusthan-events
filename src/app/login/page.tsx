@@ -450,13 +450,17 @@ export default function UnifiedLoginPage() {
                       className="space-y-5"
                     >
                       {/* Header */}
-                      <div className="space-y-1.5">
-                        <h2 className="text-2xl sm:text-3xl font-black text-[#252525] tracking-tight font-sans">
-                          Welcome Back!
+                      <div className="space-y-2">
+                        <h2 className="text-2xl sm:text-3xl lg:text-[32px] font-black tracking-tight font-['Poppins',sans-serif] leading-tight">
+                          <span className="text-[#1A1815]">Welcome </span>
+                          <span className="relative inline-block bg-gradient-to-r from-[#C99A27] via-[#E7B83F] to-[#D4951B] bg-clip-text text-transparent">
+                            Back!
+                            <span className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-[#FFE99A] via-[#E7B83F] to-[#FFE99A] rounded-full opacity-90" />
+                          </span>
                         </h2>
                         
-                        <p className="text-xs sm:text-sm text-[#77736A] leading-relaxed">
-                          Sign in to explore HICET campus events.
+                        <p className="text-xs sm:text-sm text-[#615B50] font-medium leading-relaxed font-['Poppins',sans-serif]">
+                          Sign in to explore <span className="font-semibold text-[#B38018] underline decoration-[#FFE99A] decoration-2 underline-offset-4">HICET campus events</span>.
                         </p>
                       </div>
 
